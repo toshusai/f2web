@@ -1,0 +1,16 @@
+export enum Align {
+  TopLeft,
+  TopCenter,
+  TopRight,
+  Left,
+  Center,
+  Right,
+  BottomLeft,
+  BottomCenter,
+  BottomRight,
+  LeftAuto,
+  RightAuto,
+  TopAuto,
+  BottomAuto,
+  CenterAuto,
+}

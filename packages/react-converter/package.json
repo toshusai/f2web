@@ -1,0 +1,13 @@
+{
+  "name": "@f2web/react-converter",
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "yarn@3.6.3",
+  "dependencies": {
+    "js-convert-case": "^4.2.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.75.0",
+    "typescript": "^5.1.6"
+  }
+}
