@@ -1769,44 +1769,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@f2web/code-writer@workspace:packages/code-writer":
-  version: 0.0.0-use.local
-  resolution: "@f2web/code-writer@workspace:packages/code-writer"
-  dependencies:
-    "@f2web/web": ../web
-    express: ^4.18.2
-    ts-node: ^10.9.1
-    typescript: ^5.1.6
-  languageName: unknown
-  linkType: soft
-
 "@f2web/core@file:../core::locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples":
   version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples"
+  resolution: "@f2web/core@file:../core#../core::hash=6b3d9e&locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples"
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
-  languageName: node
-  linkType: hard
-
-"@f2web/core@file:../core::locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Db1ddb0%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer":
-  version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Db1ddb0%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer"
-  dependencies:
-    react: ^18.2.0
-    react-dom: ^18.2.0
-  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
-  languageName: node
-  linkType: hard
-
-"@f2web/core@file:../core::locator=%40f2web%2Fweb%40workspace%3Apackages%2Fweb":
-  version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fweb%40workspace%3Apackages%2Fweb"
-  dependencies:
-    react: ^18.2.0
-    react-dom: ^18.2.0
-  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
+  checksum: b466ea98af58ce42acd74c145189b6f720dd37c0ce39d97ce476ccd10f0f0d9d15cc9db8747a22c28a606b7698038a95bbf39dc0205cc5a4a218e9d1b78f6ad1
   languageName: node
   linkType: hard
 
@@ -1885,21 +1854,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@f2web/web@file:../web::locator=%40f2web%2Fcode-writer%40workspace%3Apackages%2Fcode-writer":
-  version: 0.0.0
-  resolution: "@f2web/web@file:../web#../web::hash=b1ddb0&locator=%40f2web%2Fcode-writer%40workspace%3Apackages%2Fcode-writer"
-  dependencies:
-    "@f2web/core": ../core
-    js-convert-case: ^4.2.0
-  checksum: 1a8f078fcd221d34d43e7fd671ddfc955732e4686b58020af7fe3c6f6d46c8a3c6cdcf844f3fdd821b4b1b697a1660c86cad26862166d76c8f98d88fa0c049a1
-  languageName: node
-  linkType: hard
-
 "@f2web/web@workspace:packages/web":
   version: 0.0.0-use.local
   resolution: "@f2web/web@workspace:packages/web"
   dependencies:
-    "@f2web/core": ../core
     "@figma/plugin-typings": ^1.75.0
     js-convert-case: ^4.2.0
     typescript: ^5.1.6

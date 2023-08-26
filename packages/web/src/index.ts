@@ -5,14 +5,17 @@ import {
   Align,
   DimensionPorps,
   FillProps,
-  FrameProps,
   Layout,
+  LayoutProps,
   Size,
-} from "@f2web/core";
+  StrokeProps,
+} from "../../core/src";
 
 export type WebNode = {
   children?: WebNode[];
-  props: FrameProps | TextPropsBridge;
+  props:
+    | (FillProps & LayoutProps & DimensionPorps & StrokeProps)
+    | TextPropsBridge;
   type: "Frame" | "Text";
 };
 
@@ -86,7 +89,7 @@ export function figmaNode2WebNode(
       type: "Text",
     };
   } else {
-    const props: FrameProps = {
+    const props: FillProps & LayoutProps & DimensionPorps & StrokeProps = {
       width: (() => {
         if (
           node.layoutAlign === "STRETCH" &&
@@ -108,7 +111,13 @@ export function figmaNode2WebNode(
         return undefined;
       })(),
       height: (() => {
-        if (node.layoutGrow === 1) {
+        if (
+          node.parent &&
+          "layoutMode" in node.parent &&
+          node.parent.layoutMode === "VERTICAL" &&
+          node.layoutGrow === 1 &&
+          node.layoutAlign === "STRETCH"
+        ) {
           return Size.Fill;
         }
         if (node.layoutSizingVertical === "FIXED") {
@@ -140,6 +149,7 @@ export function figmaNode2WebNode(
         if (
           node.layoutPositioning === "ABSOLUTE" &&
           node.constraints.vertical === "MAX" &&
+          // node.parent !== undefined &&
           isRectangleCornerMixin(node.parent)
         ) {
           return node.parent.height - node.y - node.height;
@@ -159,6 +169,7 @@ export function figmaNode2WebNode(
         if (
           node.layoutPositioning === "ABSOLUTE" &&
           node.constraints.horizontal === "MAX" &&
+          // node.parent !== undefined &&
           isRectangleCornerMixin(node.parent)
         ) {
           return node.parent.width - node.x - node.width;
