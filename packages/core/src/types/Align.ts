@@ -13,4 +13,9 @@ export enum Align {
   TopAuto,
   BottomAuto,
   CenterAuto,
+  TopBetween,
+  BottomBetween,
+  LeftBetween,
+  RightBetween,
+  CenterBetween,
 }

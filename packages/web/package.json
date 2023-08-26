@@ -4,6 +4,7 @@
   "type": "module",
   "packageManager": "yarn@3.6.3",
   "dependencies": {
+    "@f2web/core": "../core",
     "js-convert-case": "^4.2.0"
   },
   "devDependencies": {

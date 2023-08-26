@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "es6",
     "outDir": "dist",
-    "strict": false,
+    "jsx": "react",
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "experimentalDecorators": true,
@@ -11,18 +12,9 @@
     "noImplicitAny": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "module": "ESNext",
     "typeRoots": [
       "../../node_modules/@types",
       "../../node_modules/@figma"
     ]
-  },
-  "include": [
-    "./src"
-  ],
-  "references": [],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
   }
 }

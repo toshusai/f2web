@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "packageManager": "yarn@3.6.3",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "js-convert-case": "^4.2.0"
   },

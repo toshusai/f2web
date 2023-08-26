@@ -3,7 +3,7 @@ import { Align } from "./Align";
 
 export type LayoutProps = {
   layout?: Layout;
-  gap?: number;
+  gap?: number | "auto";
   align?: Align;
   paddingHorizon?: number;
   paddingVertical?: number;

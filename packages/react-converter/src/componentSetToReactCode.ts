@@ -16,11 +16,15 @@ export function componentSetToReactCode(node: ComponentSetNode) {
   const src = `
 import { Frame, Text } from "@f2web/core";
 export function ${name}(props: {
-${Object.entries(defs).map(([key, value]) => {
-  if (value.type === "TEXT") {
-    return `${toCamelCase(key.split("#")[0])}: string`;
-  }
-})}
+${
+  defs
+    ? Object.entries(defs).map(([key, value]) => {
+        if (value.type === "TEXT") {
+          return `${toCamelCase(key.split("#")[0])}: string`;
+        }
+      })
+    : ""
+}
 ${imageHashes.map((hash) => `$${hash}: string`).join("\n")}
 }) {
 return (        

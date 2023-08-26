@@ -62,8 +62,29 @@ export function layoutToCss(props: LayoutProps) {
     } else if (props.align === Align.CenterAuto) {
       css.justifyContent = "auto";
       css.alignItems = "center";
+    } else if (props.align === Align.TopBetween) {
+      css.justifyContent = "space-between";
+      css.alignItems = "flex-start";
+    } else if (props.align === Align.BottomBetween) {
+      css.justifyContent = "space-between";
+      css.alignItems = "flex-end";
+    } else if (props.align === Align.LeftBetween) {
+      css.justifyContent = "space-between";
+      css.alignItems = "flex-start";
+    } else if (props.align === Align.RightBetween) {
+      css.justifyContent = "space-between";
+      css.alignItems = "flex-end";
+    } else if (props.align === Align.CenterBetween) {
+      css.justifyContent = "space-between";
+      css.alignItems = "center";
     }
-    if (props.layout == Layout.Vertical) {
+    if (
+      props.layout == Layout.Vertical &&
+      props.align !== Align.CenterBetween &&
+      props.align !== Align.LeftBetween &&
+      props.align !== Align.RightBetween &&
+      props.align !== Align.TopBetween
+    ) {
       const jc = css.justifyContent;
       css.justifyContent = css.alignItems;
       css.alignItems = jc;

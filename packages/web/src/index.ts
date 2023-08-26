@@ -8,7 +8,7 @@ import {
   FrameProps,
   Layout,
   Size,
-} from "../../core";
+} from "@f2web/core";
 
 export type WebNode = {
   children?: WebNode[];
@@ -79,7 +79,7 @@ export function figmaNode2WebNode(
         if (isMixed(node.fontName)) return undefined;
         if (node.fontName.style === "Italic") return "italic";
         return undefined;
-      })(),
+      })() as "normal" | "italic" | "oblique" | "bold",
     };
     return {
       props,
@@ -173,7 +173,7 @@ export function figmaNode2WebNode(
       overflow: (() => {
         if (node.clipsContent) return "hidden";
         return undefined;
-      })(),
+      })() as "hidden" | "scroll" | "auto" | undefined,
 
       layout: (() => {
         if (node.layoutMode === "HORIZONTAL") {
@@ -219,6 +219,17 @@ export function figmaNode2WebNode(
               return Align.BottomRight;
             }
           }
+          if (node.primaryAxisAlignItems === "SPACE_BETWEEN") {
+            if (node.counterAxisAlignItems === "MIN") {
+              return Align.TopBetween;
+            }
+            if (node.counterAxisAlignItems === "CENTER") {
+              return Align.CenterBetween;
+            }
+            if (node.counterAxisAlignItems === "MAX") {
+              return Align.BottomBetween;
+            }
+          }
         }
         if (node.layoutMode === "VERTICAL") {
           if (node.primaryAxisAlignItems === "MIN") {
@@ -254,9 +265,22 @@ export function figmaNode2WebNode(
               return Align.BottomRight;
             }
           }
+          if (node.primaryAxisAlignItems === "SPACE_BETWEEN") {
+            if (node.counterAxisAlignItems === "MIN") {
+              return Align.LeftBetween;
+            }
+            if (node.counterAxisAlignItems === "CENTER") {
+              return Align.CenterBetween;
+            }
+            if (node.counterAxisAlignItems === "MAX") {
+              return Align.RightBetween;
+            }
+          }
         }
       })(),
-      gap: node.itemSpacing,
+      gap: (() => {
+        return node.itemSpacing;
+      })(),
       fillColor: (() => {
         if (isMixed(node.fills)) return undefined;
         if (node.fills.length === 0) return undefined;
@@ -302,7 +326,7 @@ export function figmaNode2WebNode(
         if (isMixed(node.strokeWeight)) return undefined;
         if (typeof node.strokeWeight === "number") return "solid";
         return undefined;
-      })(),
+      })() as "solid" | "dashed" | "dotted" | undefined,
     };
 
     return {
