@@ -1,12 +1,15 @@
 import React, { CSSProperties } from "react";
-import { StrokeProps } from "./types/StrokeProps";
-import { DimensionPorps } from "./types/DimensionPorps";
-import { LayoutProps } from "./types/LayoutProps";
-import { FillProps } from "./types/FillProps";
-import { fillToCss } from "./converter/fillToCss";
-import { dimensionToCss } from "./converter/dimensionToCss";
-import { layoutToCss } from "./converter/layoutToCss";
-import { strokeToCss } from "./converter/strokeToCss";
+import { DimensionPorps } from "../../../../core/src";
+import { LayoutProps } from "../../../../core/src";
+import { FillProps } from "../../../../core/src";
+import { StrokeProps } from "../../../../core/src/types";
+import {
+  dimensionToCss,
+  fillToCss,
+  layoutToCss,
+  strokeToCss,
+} from "../converter";
+
 export { Text } from "./Text";
 
 export type FrameProps = DimensionPorps &

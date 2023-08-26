@@ -1,5 +1,5 @@
 import React from "react";
-import { FillProps } from "../types/FillProps";
+import { FillProps } from "../../../../core/src/types/FillProps";
 
 export function fillToCss(props: FillProps) {
   const css: React.CSSProperties = {};

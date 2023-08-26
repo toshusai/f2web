@@ -1,5 +1,5 @@
 import { toCamelCase } from "js-convert-case";
-import { figmaNode2WebNode } from "../../web/src";
+import { figmaNode2WebNode } from "../../../web/src";
 import { webNodeToFrameJSXString } from "./webNodeToFrameJSXString";
 import { findAllImageHashes } from "./findAllImageHashes";
 

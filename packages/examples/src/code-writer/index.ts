@@ -1,10 +1,6 @@
 import express from "express";
 import fs from "fs";
-import {
-  componentSetToReactCode,
-  componentSetToStoriesTsx,
-} from "@f2web/react-converter/src";
-
+import { componentSetToReactCode, componentSetToStoriesTsx } from "../react";
 const app = express();
 
 app.use(express.json());
@@ -15,22 +11,7 @@ app.use((_req, res, next) => {
   next();
 });
 
-const dir = "../storybook/src/stories";
-
-// function findById(node: any, id: string) {
-//   if (node.id === id) {
-//     return node;
-//   }
-//   if (node.children) {
-//     for (let child of node.children) {
-//       const found = findById(child, id);
-//       if (found) {
-//         return found;
-//       }
-//     }
-//   }
-//   return null;
-// }
+const dir = "./src/stories";
 
 function linkParent(node: any) {
   if (node.children) {

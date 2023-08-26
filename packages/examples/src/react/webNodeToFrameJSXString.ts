@@ -1,6 +1,6 @@
-import { WebNode } from "../../web/src";
+import { WebNode } from "../../../web/src";
 
-export function webNodeToFrameJSXString(wNode: WebNode, depth = 0) {
+export function webNodeToFrameJSXString(wNode: WebNode, depth = 0): string {
   const attrs = Object.entries(wNode.props)
     .map(([key, value]) => {
       if (value === undefined) return "";

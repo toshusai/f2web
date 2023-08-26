@@ -1,7 +1,7 @@
 import React from "react";
-import { Layout } from "../types";
-import { Align } from "../types";
-import { LayoutProps } from "../types";
+import { Layout } from "../../../../core/src/types";
+import { Align } from "../../../../core/src/types";
+import { LayoutProps } from "../../../../core/src/types";
 
 export function layoutToCss(props: LayoutProps) {
   const css: React.CSSProperties = {

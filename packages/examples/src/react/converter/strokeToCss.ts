@@ -1,5 +1,5 @@
 import React from "react";
-import { StrokeProps } from "../types";
+import { StrokeProps } from "../../../../core/src/types";
 
 export function strokeToCss(props: StrokeProps) {
   const css: React.CSSProperties = {};

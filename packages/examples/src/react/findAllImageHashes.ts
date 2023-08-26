@@ -1,4 +1,4 @@
-import { isMixed } from "../../web/src/utils";
+import { isMixed } from "../../../web/src/utils";
 
 export function findAllImageHashes(node: SceneNode): string[] {
   const imageHashes: string[] = [];

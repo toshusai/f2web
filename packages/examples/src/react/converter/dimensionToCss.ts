@@ -1,5 +1,5 @@
 import React from "react";
-import { DimensionPorps, Size } from "../types";
+import { DimensionPorps, Size } from "../../../../core/src/types";
 
 export function dimensionToCss(props: DimensionPorps) {
   const css: React.CSSProperties = {};

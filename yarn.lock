@@ -1780,33 +1780,33 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@f2web/core@file:../core::locator=%40f2web%2Fstorybook%40workspace%3Apackages%2Fstorybook":
+"@f2web/core@file:../core::locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples":
   version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=91108d&locator=%40f2web%2Fstorybook%40workspace%3Apackages%2Fstorybook"
+  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples"
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 2d3256da9f94ae9db02c9c2e711e2bbc79ad3d07cf6c3b38820f9eea2242591a4b13f43919e098af57a8f0e5d7d2533d1807cdf882b2dc42936bc9ad4cad7045
+  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
   languageName: node
   linkType: hard
 
-"@f2web/core@file:../core::locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Daf9fc1%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer":
+"@f2web/core@file:../core::locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Db1ddb0%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer":
   version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=91108d&locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Daf9fc1%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer"
+  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fweb%40file%3A..%2Fweb%23..%2Fweb%3A%3Ahash%3Db1ddb0%26locator%3D%2540f2web%252Fcode-writer%2540workspace%253Apackages%252Fcode-writer"
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 2d3256da9f94ae9db02c9c2e711e2bbc79ad3d07cf6c3b38820f9eea2242591a4b13f43919e098af57a8f0e5d7d2533d1807cdf882b2dc42936bc9ad4cad7045
+  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
   languageName: node
   linkType: hard
 
 "@f2web/core@file:../core::locator=%40f2web%2Fweb%40workspace%3Apackages%2Fweb":
   version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=91108d&locator=%40f2web%2Fweb%40workspace%3Apackages%2Fweb"
+  resolution: "@f2web/core@file:../core#../core::hash=1c74ae&locator=%40f2web%2Fweb%40workspace%3Apackages%2Fweb"
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 2d3256da9f94ae9db02c9c2e711e2bbc79ad3d07cf6c3b38820f9eea2242591a4b13f43919e098af57a8f0e5d7d2533d1807cdf882b2dc42936bc9ad4cad7045
+  checksum: be7571190876f8480728a0fc9fb85427089d78ce8e83ef3a8bcdd695c065f5d13b820205cd23d3b62a153a8a152f31bb37515ee6e988e142c69bd953ba96d5b0
   languageName: node
   linkType: hard
 
@@ -1817,6 +1817,39 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     typescript: ^5.0.2
+  languageName: unknown
+  linkType: soft
+
+"@f2web/examples@workspace:packages/examples":
+  version: 0.0.0-use.local
+  resolution: "@f2web/examples@workspace:packages/examples"
+  dependencies:
+    "@f2web/core": ../core
+    "@figma/plugin-typings": ^1.76.0
+    "@storybook/addon-essentials": ^7.3.2
+    "@storybook/addon-interactions": ^7.3.2
+    "@storybook/addon-links": ^7.3.2
+    "@storybook/addon-onboarding": ^1.0.8
+    "@storybook/blocks": ^7.3.2
+    "@storybook/react": ^7.3.2
+    "@storybook/react-vite": ^7.3.2
+    "@storybook/testing-library": ^0.2.0
+    "@types/react": ^18.2.15
+    "@types/react-dom": ^18.2.7
+    "@typescript-eslint/eslint-plugin": ^6.0.0
+    "@typescript-eslint/parser": ^6.0.0
+    "@vitejs/plugin-react": ^4.0.3
+    eslint: ^8.45.0
+    eslint-plugin-react-hooks: ^4.6.0
+    eslint-plugin-react-refresh: ^0.4.3
+    eslint-plugin-storybook: ^0.6.13
+    express: ^4.18.2
+    react: ^18.2.0
+    react-dom: ^18.2.0
+    storybook: ^7.3.2
+    ts-node: ^10.9.1
+    typescript: ^5.0.2
+    vite: ^4.4.5
   languageName: unknown
   linkType: soft
 
@@ -1852,53 +1885,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@f2web/react-converter@workspace:packages/react-converter":
-  version: 0.0.0-use.local
-  resolution: "@f2web/react-converter@workspace:packages/react-converter"
-  dependencies:
-    "@figma/plugin-typings": ^1.75.0
-    js-convert-case: ^4.2.0
-    typescript: ^5.1.6
-  languageName: unknown
-  linkType: soft
-
-"@f2web/storybook@workspace:packages/storybook":
-  version: 0.0.0-use.local
-  resolution: "@f2web/storybook@workspace:packages/storybook"
-  dependencies:
-    "@f2web/core": ../core
-    "@storybook/addon-essentials": ^7.3.2
-    "@storybook/addon-interactions": ^7.3.2
-    "@storybook/addon-links": ^7.3.2
-    "@storybook/addon-onboarding": ^1.0.8
-    "@storybook/blocks": ^7.3.2
-    "@storybook/react": ^7.3.2
-    "@storybook/react-vite": ^7.3.2
-    "@storybook/testing-library": ^0.2.0
-    "@types/react": ^18.2.15
-    "@types/react-dom": ^18.2.7
-    "@typescript-eslint/eslint-plugin": ^6.0.0
-    "@typescript-eslint/parser": ^6.0.0
-    "@vitejs/plugin-react": ^4.0.3
-    eslint: ^8.45.0
-    eslint-plugin-react-hooks: ^4.6.0
-    eslint-plugin-react-refresh: ^0.4.3
-    eslint-plugin-storybook: ^0.6.13
-    react: ^18.2.0
-    react-dom: ^18.2.0
-    storybook: ^7.3.2
-    typescript: ^5.0.2
-    vite: ^4.4.5
-  languageName: unknown
-  linkType: soft
-
 "@f2web/web@file:../web::locator=%40f2web%2Fcode-writer%40workspace%3Apackages%2Fcode-writer":
   version: 0.0.0
-  resolution: "@f2web/web@file:../web#../web::hash=af9fc1&locator=%40f2web%2Fcode-writer%40workspace%3Apackages%2Fcode-writer"
+  resolution: "@f2web/web@file:../web#../web::hash=b1ddb0&locator=%40f2web%2Fcode-writer%40workspace%3Apackages%2Fcode-writer"
   dependencies:
     "@f2web/core": ../core
     js-convert-case: ^4.2.0
-  checksum: 504c15153234896a44d63d2434c335932a8876793e8f6051cf424f7a59404ed2fee38eeeb3b82bceb4c08774a83b74de4f821acdfcaa9bfbd5308aede1b4647c
+  checksum: 1a8f078fcd221d34d43e7fd671ddfc955732e4686b58020af7fe3c6f6d46c8a3c6cdcf844f3fdd821b4b1b697a1660c86cad26862166d76c8f98d88fa0c049a1
   languageName: node
   linkType: hard
 
@@ -1924,6 +1917,13 @@ __metadata:
   version: 1.75.0
   resolution: "@figma/plugin-typings@npm:1.75.0"
   checksum: 13b7e6720faa3e2ff21149e7d1c823be15c81c3a0294609927d195e878da1b2586c35a55bfd42166fce8511a81ca0d3a6bd7834ffb0d18e894a98cbce4d55ad0
+  languageName: node
+  linkType: hard
+
+"@figma/plugin-typings@npm:^1.76.0":
+  version: 1.76.0
+  resolution: "@figma/plugin-typings@npm:1.76.0"
+  checksum: 88feff4141db9aab5d9c3da9b69a8e886083e3f02378a050d8de504db9abaccbaf8af20f4ac8fec9c77bf9812f05e85f09e6fcd20b445e82569e668569832461
   languageName: node
   linkType: hard
 

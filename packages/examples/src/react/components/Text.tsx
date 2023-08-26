@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
-import { DimensionPorps } from "./types/DimensionPorps";
-import { FillProps } from "./types/FillProps";
-import { dimensionToCss } from "./converter/dimensionToCss";
+import { DimensionPorps } from "../../../../core/src/types/DimensionPorps";
+import { FillProps } from "../../../../core/src/types/FillProps";
+import { dimensionToCss } from "../converter";
 export type TextProps = DimensionPorps &
   FillProps & {
     text?: string;
