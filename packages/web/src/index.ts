@@ -1,3 +1,4 @@
+import { EffectProps } from "./../../core/src/types/EffectProps";
 import { toCamelCase } from "js-convert-case";
 export function varIdToVariableName(id: string) {
   let name = id.split("#")[0];
@@ -21,7 +22,7 @@ export type WebNode =
   | {
       children?: WebNode[];
       props:
-        | (FillProps & LayoutProps & DimensionPorps & StrokeProps)
+        | (FillProps & LayoutProps & DimensionPorps & StrokeProps & EffectProps)
         | TextPropsBridge;
       type: "Frame" | "Text";
     }
@@ -130,14 +131,17 @@ export function figmaNode2WebNode(
       type: "Text",
     };
   } else {
-    const props: FillProps & LayoutProps & DimensionPorps & StrokeProps = {
+    const props: FillProps &
+      LayoutProps &
+      DimensionPorps &
+      StrokeProps &
+      EffectProps = {
       width: (() => {
         if (
           (node.parent &&
             "layoutMode" in node.parent &&
             node.parent.layoutMode === "HORIZONTAL" &&
-            node.layoutGrow === 1 &&
-            node.layoutAlign === "STRETCH") ||
+            node.layoutGrow === 1) ||
           (node.parent &&
             "layoutMode" in node.parent &&
             node.parent.layoutMode === "VERTICAL" &&
@@ -240,6 +244,28 @@ export function figmaNode2WebNode(
       borderRadius: (() => {
         if (node.cornerRadius === 0) return undefined;
         if (typeof node.cornerRadius === "number") return node.cornerRadius;
+        return undefined;
+      })(),
+      borderBottomLeftRadius: (() => {
+        if (node.bottomLeftRadius === 0) return undefined;
+        if (typeof node.bottomLeftRadius === "number")
+          return node.bottomLeftRadius;
+        return undefined;
+      })(),
+      borderBottomRightRadius: (() => {
+        if (node.bottomRightRadius === 0) return undefined;
+        if (typeof node.bottomRightRadius === "number")
+          return node.bottomRightRadius;
+        return undefined;
+      })(),
+      borderTopLeftRadius: (() => {
+        if (node.topLeftRadius === 0) return undefined;
+        if (typeof node.topLeftRadius === "number") return node.topLeftRadius;
+        return undefined;
+      })(),
+      borderTopRightRadius: (() => {
+        if (node.topRightRadius === 0) return undefined;
+        if (typeof node.topRightRadius === "number") return node.topRightRadius;
         return undefined;
       })(),
       overflow: (() => {
@@ -399,6 +425,20 @@ export function figmaNode2WebNode(
         if (typeof node.strokeWeight === "number") return "solid";
         return undefined;
       })() as "solid" | "dashed" | "dotted" | undefined,
+      boxShadow: (() => {
+        if (isMixed(node.effects)) return undefined;
+        if (!node.effects) return undefined;
+        if (node.effects.length === 0) return undefined;
+        const effect = node.effects[0];
+        if (effect.type === "DROP_SHADOW") {
+          return `${effect.offset.x}px ${effect.offset.y}px ${
+            effect.radius
+          }px ${effect.spread ? `${effect.spread}px ` : ""}rgba(${
+            effect.color.r * 255
+          },${effect.color.g * 255},${effect.color.b * 255},${effect.color.a})`;
+        }
+        return undefined;
+      })(),
     };
 
     return {

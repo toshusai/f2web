@@ -54,6 +54,7 @@ export function toTailwindHtml(webNode: WebNode) {
     ...fillToCss(props as FillProps, webNode.type),
     ...dimensionToClasses(props as DimensionPorps),
     ...textPropsToClasses(props as TextProps),
+    ...effectToClasses(props),
   ];
   const isImage = webNode.props.src !== undefined;
 
@@ -106,6 +107,15 @@ function textPropsToClasses(props: TextProps) {
   }
   if (props.fontWeight !== undefined) {
     classes.push(`font-[${props.fontWeight}]`);
+  }
+  return classes;
+}
+
+function effectToClasses(props: any) {
+  const classes: string[] = [];
+  if (props.boxShadow !== undefined) {
+    const value = props.boxShadow.replace(/ /g, "_");
+    classes.push(`shadow-[${value}]`);
   }
   return classes;
 }
@@ -165,7 +175,7 @@ export function dimensionToClasses(props: DimensionPorps) {
     if (props.height === Size.Fill) {
       classes.push(`h-full`);
     } else if (props.height === Size.Hug) {
-      classes.push(`h-auto`);
+      classes.push(`h-fit`);
     } else {
       classes.push(`h-[${props.height}px]`);
     }
@@ -209,6 +219,19 @@ export function dimensionToClasses(props: DimensionPorps) {
 
   if (props.borderRadius !== undefined) {
     classes.push(`rounded-[${props.borderRadius}px]`);
+  }
+
+  if (props.borderBottomLeftRadius !== undefined) {
+    classes.push(`rounded-bl-[${props.borderBottomLeftRadius}px]`);
+  }
+  if (props.borderBottomRightRadius !== undefined) {
+    classes.push(`rounded-br-[${props.borderBottomRightRadius}px]`);
+  }
+  if (props.borderTopLeftRadius !== undefined) {
+    classes.push(`rounded-tl-[${props.borderTopLeftRadius}px]`);
+  }
+  if (props.borderTopRightRadius !== undefined) {
+    classes.push(`rounded-tr-[${props.borderTopRightRadius}px]`);
   }
 
   if (props.overflow !== undefined) {

@@ -19,7 +19,7 @@ export function figmaNodeToJson(node: SceneNode) {
     fills: "fills" in node ? node.fills : null,
     cornerRadius: "cornerRadius" in node ? node.cornerRadius : null,
     topLeftRadius: "topLeftRadius" in node ? node.topLeftRadius : null,
-    topRightRadius: "topRightRadius" in node ? node.topRightRadius : null,
+    topRightRadius: "topRightRadius" in node ? node.topRightRadius: null,
     bottomLeftRadius: "bottomLeftRadius" in node ? node.bottomLeftRadius : null,
     bottomRightRadius:
       "bottomRightRadius" in node ? node.bottomRightRadius : null,
@@ -77,6 +77,7 @@ export function figmaNodeToJson(node: SceneNode) {
             parent: figmaNodeToJson(node.mainComponent!.parent as any),
           }
         : null,
+    effects: "effects" in node ? node.effects : null,
   };
   return obj;
 }

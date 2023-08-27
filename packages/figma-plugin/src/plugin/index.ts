@@ -37,8 +37,8 @@ if (typeof figma !== "undefined") {
     const node = figma.currentPage.selection[0];
     const componentSet = findComponentSetParent(node);
     if (componentSet === null) return;
-    console.log(componentSet.componentPropertyDefinitions);
     const body = figmaNodeToJson(componentSet);
+    dropSymbolRecursively(body);
     figma.ui.postMessage({ type: "selection", message: body });
   });
   figma.on("documentchange", () => {
@@ -46,8 +46,32 @@ if (typeof figma !== "undefined") {
     const componentSet = findComponentSetParent(node);
     if (componentSet === null) return;
     const body = figmaNodeToJson(componentSet);
+    dropSymbolRecursively(body);
     figma.ui.postMessage({ type: "selection", message: body });
   });
+}
+
+function isSymbol(obj: any) {
+  return obj && obj.type === "SYMBOL";
+}
+
+function dropSymbolRecursively(obj: any) {
+  if (typeof obj !== "object" || obj === null) return obj;
+  try {
+    Object.keys(obj).forEach((key) => {
+      if (
+        obj[key] instanceof Symbol ||
+        isSymbol(obj[key]) ||
+        typeof obj[key] === "symbol"
+      ) {
+        delete obj[key];
+      }
+      if (typeof obj[key] === "object") {
+        dropSymbolRecursively(obj[key]);
+      }
+    });
+  } catch (e) {}
+  return obj;
 }
 
 function findComponentSetParent(node?: any): ComponentSetNode | null {
