@@ -43,11 +43,12 @@ export function App() {
   addEventListener("selection", (message) => {
     const preview = document.getElementById("preview");
     if (!preview) return;
-    linkParent(message);
+    const { componentSet, componentIndex } = message;
+    linkParent(componentSet);
     const webNode = nullToUndefinedRecursive(
-      figmaNode2WebNode(message, message)
+      figmaNode2WebNode(componentSet, componentSet)
     );
-    preview.innerHTML = toTailwindHtml(webNode);
+    preview.innerHTML = toTailwindHtml(webNode.children[componentIndex]);
     const codeContent = document.getElementById("code-content");
     if (!codeContent) return;
     const html = prettier.format(preview.innerHTML, {
@@ -56,14 +57,14 @@ export function App() {
       bracketSameLine: true,
       printWidth: 256,
     });
-    const p = changeToProps(message);
+    const p = changeToProps(componentSet);
     codeContent.textContent = html + "\n\n" + JSON.stringify(p, null, 2);
     hljs.highlightAll();
   });
 
   return (
     <div>
-      <div id="preview"></div>
+      <div id="preview" className="p-[16px]"></div>
       <pre
         style={{
           fontSize: "10px",

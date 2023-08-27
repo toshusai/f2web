@@ -27,7 +27,8 @@ export type WebNode =
       type: "Frame" | "Text";
     }
   | InstanceWebNode
-  | SlotInstanceWebNode;
+  | SlotInstanceWebNode
+  | SVGWebNode;
 
 type InstanceWebNode = {
   type: "Instance";
@@ -36,6 +37,12 @@ type InstanceWebNode = {
 type SlotInstanceWebNode = {
   type: "SlotInstance";
   props: any;
+};
+type SVGWebNode = {
+  type: "SVG";
+  props: {
+    svg: string;
+  };
 };
 
 type TextPropsBridge = {
@@ -48,12 +55,12 @@ type TextPropsBridge = {
   FillProps;
 
 export function figmaNode2WebNode(
-  node: FrameNode | InstanceNode | TextNode,
+  node: FrameNode | InstanceNode | TextNode | VectorNode,
   root: ComponentSetNode,
   options?: {
     useInstance?: boolean;
   }
-): WebNode {
+): WebNode | null {
   if (node.type === "INSTANCE" && options?.useInstance) {
     for (const key in root.componentPropertyDefinitions) {
       if (node.componentPropertyReferences?.mainComponent === key) {
@@ -72,6 +79,26 @@ export function figmaNode2WebNode(
         name: node.name,
       },
     };
+  }
+  if (!node.visible) {
+    return null;
+  }
+  if (node.type === "VECTOR") {
+    try {
+      if ("svg" in node) {
+        const svg = new TextDecoder("utf-8").decode(node.svg as Uint8Array);
+        return {
+          type: "SVG",
+          props: {
+            svg,
+          },
+        };
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
   }
   if (node.type === "TEXT") {
     const props: TextPropsBridge = {
@@ -160,6 +187,34 @@ export function figmaNode2WebNode(
         if (node.layoutSizingHorizontal === "FIXED") {
           return node.width;
         }
+        return undefined;
+      })(),
+      borderTop: (() => {
+        if (!node.strokes) return;
+        if (isMixed(node.strokes)) return;
+        if (node.strokes.length === 0) return;
+        if (node.strokeTopWeight !== 0) return node.strokeTopWeight;
+        return undefined;
+      })(),
+      borderLeft: (() => {
+        if (!node.strokes) return;
+        if (isMixed(node.strokes)) return;
+        if (node.strokes.length === 0) return;
+        if (node.strokeLeftWeight !== 0) return node.strokeLeftWeight;
+        return undefined;
+      })(),
+      borderRight: (() => {
+        if (!node.strokes) return;
+        if (isMixed(node.strokes)) return;
+        if (node.strokes.length === 0) return;
+        if (node.strokeRightWeight !== 0) return node.strokeRightWeight;
+        return undefined;
+      })(),
+      borderBottom: (() => {
+        if (!node.strokes) return;
+        if (isMixed(node.strokes)) return;
+        if (node.strokes.length === 0) return;
+        if (node.strokeBottomWeight !== 0) return node.strokeBottomWeight;
         return undefined;
       })(),
       minWidth: (() => {
@@ -380,6 +435,7 @@ export function figmaNode2WebNode(
         return node.itemSpacing;
       })(),
       fillColor: (() => {
+        if (!node.fills) return undefined;
         if (isMixed(node.fills)) return undefined;
         if (node.fills.length === 0) return undefined;
         const fill = node.fills[0];
@@ -391,6 +447,7 @@ export function figmaNode2WebNode(
         return undefined;
       })(),
       src: (() => {
+        if (!node.fills) return undefined;
         if (isMixed(node.fills)) return undefined;
         if (node.fills.length === 0) return undefined;
         const fill = node.fills[0];
@@ -442,9 +499,12 @@ export function figmaNode2WebNode(
     };
 
     return {
-      children: node.children?.map((child) =>
-        figmaNode2WebNode(child as FrameNode | InstanceNode, root)
-      ),
+      children: node.children
+        ?.filter((child) => child.visible)
+        ?.map((child) =>
+          figmaNode2WebNode(child as FrameNode | InstanceNode, root)
+        )
+        .filter((child) => child) as WebNode[] | undefined,
       props,
       type: "Frame",
     };

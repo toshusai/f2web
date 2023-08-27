@@ -9,6 +9,7 @@ import {
   Layout,
   LayoutProps,
   Size,
+  StrokeProps,
 } from "../../../core/src";
 import { toCamelCase } from "js-convert-case";
 
@@ -21,11 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
   root.render(<App />);
 });
 
-function typeToType(type: ComponentPropertyType) {
+function typeToType(type: ComponentPropertyType, variantOptions?: string[]) {
   if (type === "TEXT") return "string";
   if (type === "BOOLEAN") return "boolean";
   if (type === "INSTANCE_SWAP") return "Component";
-  if (type === "VARIANT") return "string";
+  if (type === "VARIANT")
+    return variantOptions?.map((v) => `"${v}"`).join(" | ");
   throw new Error(`Unknown type ${type}`);
 }
 
@@ -41,7 +43,7 @@ export function changeToProps(componentSet: ComponentSetNode) {
   const obj = {};
   for (const key in componentSet.componentPropertyDefinitions) {
     const prop = componentSet.componentPropertyDefinitions[key];
-    obj[varIdToVariableName(key)] = typeToType(prop.type);
+    obj[varIdToVariableName(key)] = typeToType(prop.type, prop.variantOptions);
   }
   return obj;
 }
@@ -55,6 +57,7 @@ export function toTailwindHtml(webNode: WebNode) {
     ...dimensionToClasses(props as DimensionPorps),
     ...textPropsToClasses(props as TextProps),
     ...effectToClasses(props),
+    ...strokesToClasses(props as StrokeProps),
   ];
   const isImage = webNode.props.src !== undefined;
 
@@ -65,9 +68,13 @@ export function toTailwindHtml(webNode: WebNode) {
   if (webNode.type === "SlotInstance") {
     return `\${props.${webNode.props.name}}`;
   }
-  // if (webNode.type === "Instance") {
-  //   return `<${webNode.props.name} />`;
-  // }
+
+  if (webNode.type === "SVG") {
+    return webNode.props.svg;
+  }
+  if (webNode.type === "Instance") {
+    return `<${webNode.props.name} />`;
+  }
   const attrs: { [key: string]: string } = {};
   if (isImage) {
     attrs.src = `https://picsum.photos/seed/${props.src}/600/400`;
@@ -93,6 +100,50 @@ type TextProps = {
   fontStyle?: "normal" | "italic" | "oblique";
   fontWeight?: "normal" | "bold" | "bolder" | "lighter" | number;
 };
+
+function strokesToClasses(props: StrokeProps) {
+  const classes: string[] = [];
+  if (
+    props.borderWidth !== undefined ||
+    props.borderBottom !== undefined ||
+    props.borderTop !== undefined ||
+    props.borderLeft !== undefined ||
+    props.borderRight !== undefined
+  ) {
+    classes.push(`before:border-[${props.borderWidth}px]`);
+    classes.push(`before:absolute`);
+    classes.push(`before:w-full`);
+    classes.push(`before:h-full`);
+  }
+  if (props.borderColor !== undefined) {
+    const cssKey = `${rgbaToHex(props.borderColor)}`;
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            [cssKey]: props.borderColor,
+            ...tailwind.config.theme?.extend?.colors,
+          },
+        },
+      },
+    };
+    classes.push(`before:border-${cssKey}`);
+  }
+  if (props.borderTop !== undefined) {
+    classes.push(`before:border-t-[${props.borderTop}px]`);
+  }
+  if (props.borderBottom !== undefined) {
+    classes.push(`before:border-b-[${props.borderBottom}px]`);
+  }
+  if (props.borderLeft !== undefined) {
+    classes.push(`before:border-l-[${props.borderLeft}px]`);
+  }
+  if (props.borderRight !== undefined) {
+    classes.push(`before:border-r-[${props.borderRight}px]`);
+  }
+
+  return classes;
+}
 
 function textPropsToClasses(props: TextProps) {
   const classes: string[] = [];
@@ -315,6 +366,7 @@ export function layoutToClasses(props: LayoutProps) {
       classes.push("justify-between");
       classes.push("items-center");
     }
+
     if (
       props.layout == Layout.Vertical &&
       props.align !== Align.CenterBetween &&
@@ -328,6 +380,7 @@ export function layoutToClasses(props: LayoutProps) {
       classes[classes.length - 1] = jc.replace("justify", "items");
     }
   }
+
   if (props.paddingBottom !== undefined) {
     classes.push(`pb-[${props.paddingBottom}px]`);
   }

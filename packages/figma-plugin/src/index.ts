@@ -1,4 +1,4 @@
-export function figmaNodeToJson(node: SceneNode) {
+export function figmaNodeToJson(node: SceneNode, promises: any[] = []) {
   const obj = {
     name: node.name,
     parentId: node.parent?.id,
@@ -6,7 +6,7 @@ export function figmaNodeToJson(node: SceneNode) {
     id: node.id,
     children:
       "children" in node
-        ? node.children.map((child) => figmaNodeToJson(child))
+        ? node.children.map((child) => figmaNodeToJson(child, promises))
         : [],
     componentPropertyReferences:
       "componentPropertyReferences" in node
@@ -19,11 +19,17 @@ export function figmaNodeToJson(node: SceneNode) {
     fills: "fills" in node ? node.fills : null,
     cornerRadius: "cornerRadius" in node ? node.cornerRadius : null,
     topLeftRadius: "topLeftRadius" in node ? node.topLeftRadius : null,
-    topRightRadius: "topRightRadius" in node ? node.topRightRadius: null,
+    topRightRadius: "topRightRadius" in node ? node.topRightRadius : null,
     bottomLeftRadius: "bottomLeftRadius" in node ? node.bottomLeftRadius : null,
     bottomRightRadius:
       "bottomRightRadius" in node ? node.bottomRightRadius : null,
     strokeWeight: "strokeWeight" in node ? node.strokeWeight : null,
+    strokeTopWeight: "strokeTopWeight" in node ? node.strokeTopWeight : null,
+    strokeRightWeight:
+      "strokeRightWeight" in node ? node.strokeRightWeight : null,
+    strokeBottomWeight:
+      "strokeBottomWeight" in node ? node.strokeBottomWeight : null,
+    strokeLeftWeight: "strokeLeftWeight" in node ? node.strokeLeftWeight : null,
     strokeAlign: "strokeAlign" in node ? node.strokeAlign : null,
     strokeCap: "strokeCap" in node ? node.strokeCap : null,
     layoutAlign: "layoutAlign" in node ? node.layoutAlign : null,
@@ -73,11 +79,29 @@ export function figmaNodeToJson(node: SceneNode) {
     mainComponent:
       "mainComponent" in node
         ? {
-            ...figmaNodeToJson(node.mainComponent as any),
-            parent: figmaNodeToJson(node.mainComponent!.parent as any),
+            ...figmaNodeToJson(node.mainComponent as any, promises),
+            parent: figmaNodeToJson(
+              node.mainComponent!.parent as any,
+              promises
+            ),
           }
         : null,
     effects: "effects" in node ? node.effects : null,
+    visible: "visible" in node ? node.visible : null,
   };
+  if (node.type === "VECTOR") {
+    promises.push(
+      node
+        .exportAsync({ format: "SVG" })
+        .then((uint8) => {
+          // const svg = new TextDecoder().decode(uint8);
+          obj["svg"] = uint8;
+        })
+        .catch((e) => {
+          console.log(node);
+          console.log(e);
+        })
+    );
+  }
   return obj;
 }

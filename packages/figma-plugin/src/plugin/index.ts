@@ -33,13 +33,23 @@ if (typeof figma !== "undefined") {
       figma.ui.postMessage({ type: "selection", message: body });
     }
   });
-  figma.on("selectionchange", () => {
+  figma.on("selectionchange", async () => {
     const node = figma.currentPage.selection[0];
     const componentSet = findComponentSetParent(node);
     if (componentSet === null) return;
-    const body = figmaNodeToJson(componentSet);
+    const promises: Promise<any>[] = [];
+    const body = figmaNodeToJson(componentSet, promises);
+    await Promise.all(promises);
     dropSymbolRecursively(body);
-    figma.ui.postMessage({ type: "selection", message: body });
+    figma.ui.postMessage({
+      type: "selection",
+      message: {
+        componentSet: body,
+        componentIndex: componentSet.children.indexOf(
+          findComponent(node) as any
+        ),
+      },
+    });
   });
   figma.on("documentchange", () => {
     const node = figma.currentPage.selection[0];
@@ -72,6 +82,17 @@ function dropSymbolRecursively(obj: any) {
     });
   } catch (e) {}
   return obj;
+}
+
+function findComponent(node?: any): ComponentNode | null {
+  if (!node) return null;
+  if (node.type === "COMPONENT") return node;
+
+  if (node.parent === null) {
+    return null;
+  }
+
+  return findComponent(node.parent) as ComponentNode;
 }
 
 function findComponentSetParent(node?: any): ComponentSetNode | null {
