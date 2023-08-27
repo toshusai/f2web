@@ -1,5 +1,5 @@
 import React from "react";
-import { toTailwindHtml } from "..";
+import { changeToProps, toTailwindHtml } from "..";
 import { figmaNode2WebNode } from "../../../../web/src";
 import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
@@ -44,7 +44,9 @@ export function App() {
     const preview = document.getElementById("preview");
     if (!preview) return;
     linkParent(message);
-    const webNode = nullToUndefinedRecursive(figmaNode2WebNode(message));
+    const webNode = nullToUndefinedRecursive(
+      figmaNode2WebNode(message, message)
+    );
     preview.innerHTML = toTailwindHtml(webNode);
     const codeContent = document.getElementById("code-content");
     if (!codeContent) return;
@@ -54,7 +56,8 @@ export function App() {
       bracketSameLine: true,
       printWidth: 256,
     });
-    codeContent.textContent = html;
+    const p = changeToProps(message);
+    codeContent.textContent = html + "\n\n" + JSON.stringify(p, null, 2);
     hljs.highlightAll();
   });
 

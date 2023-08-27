@@ -10,6 +10,7 @@ import {
   LayoutProps,
   Size,
 } from "../../../core/src";
+import { toCamelCase } from "js-convert-case";
 
 declare const tailwind: any;
 
@@ -20,9 +21,34 @@ document.addEventListener("DOMContentLoaded", function () {
   root.render(<App />);
 });
 
+function typeToType(type: ComponentPropertyType) {
+  if (type === "TEXT") return "string";
+  if (type === "BOOLEAN") return "boolean";
+  if (type === "INSTANCE_SWAP") return "Component";
+  if (type === "VARIANT") return "string";
+  throw new Error(`Unknown type ${type}`);
+}
+
+export function varIdToVariableName(id: string) {
+  let name = id.split("#")[0];
+  name = name.replace(/ /g, "");
+  name = toCamelCase(name);
+  if (name.match(/^[0-9]/)) name = "_" + name;
+  return name;
+}
+
+export function changeToProps(componentSet: ComponentSetNode) {
+  const obj = {};
+  for (const key in componentSet.componentPropertyDefinitions) {
+    const prop = componentSet.componentPropertyDefinitions[key];
+    obj[varIdToVariableName(key)] = typeToType(prop.type);
+  }
+  return obj;
+}
+
 export function toTailwindHtml(webNode: WebNode) {
   const props = webNode.props;
-  const children = webNode.children;
+  const children = "children" in webNode ? webNode.children : undefined;
   const classes = [
     ...layoutToClasses(props as LayoutProps),
     ...fillToCss(props as FillProps, webNode.type),
@@ -35,6 +61,12 @@ export function toTailwindHtml(webNode: WebNode) {
   if (isImage) {
     tag = "img";
   }
+  if (webNode.type === "SlotInstance") {
+    return `\${props.${webNode.props.name}}`;
+  }
+  // if (webNode.type === "Instance") {
+  //   return `<${webNode.props.name} />`;
+  // }
   const attrs: { [key: string]: string } = {};
   if (isImage) {
     attrs.src = `https://picsum.photos/seed/${props.src}/600/400`;
@@ -95,7 +127,7 @@ function rgbaToHex(rgba: string) {
   )}${Math.round(b).toString(16)}${Math.round(a * 255).toString(16)}`;
 }
 
-export function fillToCss(props: FillProps, type: "Frame" | "Text") {
+export function fillToCss(props: FillProps, type: WebNode["type"]) {
   const classes: string[] = [];
   if (props.fillColor) {
     const cssKey = `${rgbaToHex(props.fillColor)}`;

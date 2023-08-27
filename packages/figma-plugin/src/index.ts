@@ -70,6 +70,13 @@ export function figmaNodeToJson(node: SceneNode) {
     corderRadius: "corderRadius" in node ? node.corderRadius : null,
     overflow: "overflow" in node ? node.overflow : null,
     itemSpacing: "itemSpacing" in node ? node.itemSpacing : null,
+    mainComponent:
+      "mainComponent" in node
+        ? {
+            ...figmaNodeToJson(node.mainComponent as any),
+            parent: figmaNodeToJson(node.mainComponent!.parent as any),
+          }
+        : null,
   };
   return obj;
 }

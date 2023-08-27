@@ -1,5 +1,11 @@
 import { toCamelCase } from "js-convert-case";
-
+export function varIdToVariableName(id: string) {
+  let name = id.split("#")[0];
+  name = name.replace(/ /g, "");
+  name = toCamelCase(name);
+  if (name.match(/^[0-9]/)) name = "_" + name;
+  return name;
+}
 import { isMixed, isRectangleCornerMixin } from "./utils";
 import {
   Align,
@@ -11,12 +17,24 @@ import {
   StrokeProps,
 } from "../../core/src";
 
-export type WebNode = {
-  children?: WebNode[];
-  props:
-    | (FillProps & LayoutProps & DimensionPorps & StrokeProps)
-    | TextPropsBridge;
-  type: "Frame" | "Text";
+export type WebNode =
+  | {
+      children?: WebNode[];
+      props:
+        | (FillProps & LayoutProps & DimensionPorps & StrokeProps)
+        | TextPropsBridge;
+      type: "Frame" | "Text";
+    }
+  | InstanceWebNode
+  | SlotInstanceWebNode;
+
+type InstanceWebNode = {
+  type: "Instance";
+  props: any;
+};
+type SlotInstanceWebNode = {
+  type: "SlotInstance";
+  props: any;
 };
 
 type TextPropsBridge = {
@@ -29,15 +47,38 @@ type TextPropsBridge = {
   FillProps;
 
 export function figmaNode2WebNode(
-  node: FrameNode | InstanceNode | TextNode
+  node: FrameNode | InstanceNode | TextNode,
+  root: ComponentSetNode,
+  options?: {
+    useInstance?: boolean;
+  }
 ): WebNode {
+  if (node.type === "INSTANCE" && options?.useInstance) {
+    for (const key in root.componentPropertyDefinitions) {
+      if (node.componentPropertyReferences?.mainComponent === key) {
+        return {
+          type: "SlotInstance",
+          props: {
+            name: varIdToVariableName(key),
+          },
+        };
+      }
+    }
+
+    return {
+      type: "Instance",
+      props: {
+        name: node.name,
+      },
+    };
+  }
   if (node.type === "TEXT") {
     const props: TextPropsBridge = {
       text: (() => {
         if (node.componentPropertyReferences?.characters) {
           return () =>
-            `props.${toCamelCase(
-              node.componentPropertyReferences!.characters!.split("#")[0]
+            `props.${varIdToVariableName(
+              node.componentPropertyReferences!.characters!
             )}`;
         }
         if (node.characters === undefined) return "";
@@ -92,8 +133,16 @@ export function figmaNode2WebNode(
     const props: FillProps & LayoutProps & DimensionPorps & StrokeProps = {
       width: (() => {
         if (
-          node.layoutAlign === "STRETCH" &&
-          node.primaryAxisSizingMode != "AUTO"
+          (node.parent &&
+            "layoutMode" in node.parent &&
+            node.parent.layoutMode === "HORIZONTAL" &&
+            node.layoutGrow === 1 &&
+            node.layoutAlign === "STRETCH") ||
+          (node.parent &&
+            "layoutMode" in node.parent &&
+            node.parent.layoutMode === "VERTICAL" &&
+            node.layoutAlign === "STRETCH") ||
+          node.primaryAxisAlignItems === "MAX"
         ) {
           return Size.Fill;
         }
@@ -102,7 +151,13 @@ export function figmaNode2WebNode(
         }
         return Size.Hug;
       })(),
-      maxWidth: node.maxWidth ?? undefined,
+      maxWidth: (() => {
+        if (node.maxWidth !== null) return node.maxWidth;
+        if (node.layoutSizingHorizontal === "FIXED") {
+          return node.width;
+        }
+        return undefined;
+      })(),
       minWidth: (() => {
         if (node.minWidth !== null) return node.minWidth;
         if (node.layoutSizingHorizontal === "FIXED") {
@@ -125,7 +180,13 @@ export function figmaNode2WebNode(
         }
         return Size.Hug;
       })(),
-      maxHeight: node.maxHeight ?? undefined,
+      maxHeight: (() => {
+        if (node.maxHeight !== null) return node.maxHeight;
+        if (node.layoutSizingHorizontal === "FIXED") {
+          return node.height;
+        }
+        return undefined;
+      })(),
       minHeight: (() => {
         if (node.minHeight !== null) return node.minHeight;
         if (node.layoutSizingVertical === "FIXED") {
@@ -342,7 +403,7 @@ export function figmaNode2WebNode(
 
     return {
       children: node.children?.map((child) =>
-        figmaNode2WebNode(child as FrameNode | InstanceNode)
+        figmaNode2WebNode(child as FrameNode | InstanceNode, root)
       ),
       props,
       type: "Frame",

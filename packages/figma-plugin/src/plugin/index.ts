@@ -33,6 +33,14 @@ if (typeof figma !== "undefined") {
       figma.ui.postMessage({ type: "selection", message: body });
     }
   });
+  figma.on("selectionchange", () => {
+    const node = figma.currentPage.selection[0];
+    const componentSet = findComponentSetParent(node);
+    if (componentSet === null) return;
+    console.log(componentSet.componentPropertyDefinitions);
+    const body = figmaNodeToJson(componentSet);
+    figma.ui.postMessage({ type: "selection", message: body });
+  });
   figma.on("documentchange", () => {
     const node = figma.currentPage.selection[0];
     const componentSet = findComponentSetParent(node);
@@ -42,7 +50,7 @@ if (typeof figma !== "undefined") {
   });
 }
 
-function findComponentSetParent(node?: any) {
+function findComponentSetParent(node?: any): ComponentSetNode | null {
   if (!node) return null;
 
   if (node.parent === null) {
@@ -51,5 +59,5 @@ function findComponentSetParent(node?: any) {
   if (node.parent.type === "COMPONENT_SET") {
     return node.parent;
   }
-  return findComponentSetParent(node.parent);
+  return findComponentSetParent(node.parent) as ComponentSetNode;
 }
