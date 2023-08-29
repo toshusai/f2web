@@ -1,5 +1,5 @@
-import { typeToType } from "../typeToType";
-import { varIdToVariableName } from "../varIdToVariableName";
+import { typeToType } from "./utils/typeToType";
+import { varIdToVariableName } from "./utils/varIdToVariableName";
 
 export function changeToProps(componentSet: ComponentSetNode) {
   const obj = {};

@@ -1,5 +1,5 @@
 import { StrokeProps } from "../../../../core/src";
-import { rgbaToHex } from ".././rgbaToHex";
+import { rgbaToHex } from "./utils/rgbaToHex";
 
 export function strokesToClasses(props: StrokeProps) {
   const classes: string[] = [];
