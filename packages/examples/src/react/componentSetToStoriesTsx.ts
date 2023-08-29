@@ -22,11 +22,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
   args: {
-    ${Object.entries(defs).map(([key, value]) => {
-      if (value.type === "TEXT") {
-        return `${toCamelCase(key.split("#")[0])}: '${value.defaultValue}'`;
-      }
-    })}
+    ${Object.entries(defs)
+      .map(([key, value]) => {
+        if (value.type === "TEXT") {
+          return `${toCamelCase(key.split("#")[0])}: '${value.defaultValue}'`;
+        }
+      })
+      .filter((x) => x)
+      .join(",")},
     ${imageHashes
       .map((hash) => `$${hash}: 'https://picsum.photos/seed/${hash}/600/400'`)
       .join(",\n")}

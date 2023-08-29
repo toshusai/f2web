@@ -17,6 +17,7 @@ export function webNodeToFrameJSXString(wNode: WebNode, depth = 0): string {
     .join(" ")
     .replace(/ +/g, " ");
   if (wNode.type === "Text") return `<Text ${attrs} />`;
+  if (!("children" in wNode)) return "";
   const children = wNode.children
     ?.map((child) => webNodeToFrameJSXString(child, depth + 1))
     .join("\n");

@@ -1771,11 +1771,11 @@ __metadata:
 
 "@f2web/core@file:../core::locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples":
   version: 0.0.0
-  resolution: "@f2web/core@file:../core#../core::hash=6b3d9e&locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples"
+  resolution: "@f2web/core@file:../core#../core::hash=2c1f86&locator=%40f2web%2Fexamples%40workspace%3Apackages%2Fexamples"
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: b466ea98af58ce42acd74c145189b6f720dd37c0ce39d97ce476ccd10f0f0d9d15cc9db8747a22c28a606b7698038a95bbf39dc0205cc5a4a218e9d1b78f6ad1
+  checksum: d6d69ad9855e1a68d14fde782dd76730cf757c04f8b2d72467a133d40713cdbe8aea008376e1bcf639a8303f2c15e5f60aac2ef833c70798f078c7664f9f7bb1
   languageName: node
   linkType: hard
 
