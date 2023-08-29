@@ -17,7 +17,8 @@
     "express": "^4.18.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.3.2",

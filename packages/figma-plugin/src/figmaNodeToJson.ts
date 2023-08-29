@@ -4,12 +4,14 @@ export function figmaNodeToJson(node: SceneNode, promises: any[] = []) {
     parentId: node.parent?.id,
     type: node.type,
     id: node.id,
-    children: "children" in node
-      ? node.children.map((child) => figmaNodeToJson(child, promises))
-      : [],
-    componentPropertyReferences: "componentPropertyReferences" in node
-      ? node.componentPropertyReferences
-      : [],
+    children:
+      "children" in node
+        ? node.children.map((child) => figmaNodeToJson(child, promises))
+        : [],
+    componentPropertyReferences:
+      "componentPropertyReferences" in node
+        ? node.componentPropertyReferences
+        : [],
     lineHeight: "lineHeight" in node ? node.lineHeight : null,
     fontSize: "fontSize" in node ? node.fontSize : null,
     fontName: "fontName" in node ? node.fontName : null,
@@ -19,21 +21,28 @@ export function figmaNodeToJson(node: SceneNode, promises: any[] = []) {
     topLeftRadius: "topLeftRadius" in node ? node.topLeftRadius : null,
     topRightRadius: "topRightRadius" in node ? node.topRightRadius : null,
     bottomLeftRadius: "bottomLeftRadius" in node ? node.bottomLeftRadius : null,
-    bottomRightRadius: "bottomRightRadius" in node ? node.bottomRightRadius : null,
+    bottomRightRadius:
+      "bottomRightRadius" in node ? node.bottomRightRadius : null,
     strokeWeight: "strokeWeight" in node ? node.strokeWeight : null,
     strokeTopWeight: "strokeTopWeight" in node ? node.strokeTopWeight : null,
-    strokeRightWeight: "strokeRightWeight" in node ? node.strokeRightWeight : null,
-    strokeBottomWeight: "strokeBottomWeight" in node ? node.strokeBottomWeight : null,
+    strokeRightWeight:
+      "strokeRightWeight" in node ? node.strokeRightWeight : null,
+    strokeBottomWeight:
+      "strokeBottomWeight" in node ? node.strokeBottomWeight : null,
     strokeLeftWeight: "strokeLeftWeight" in node ? node.strokeLeftWeight : null,
     strokeAlign: "strokeAlign" in node ? node.strokeAlign : null,
     strokeCap: "strokeCap" in node ? node.strokeCap : null,
     layoutAlign: "layoutAlign" in node ? node.layoutAlign : null,
-    primaryAxisSizingMode: "primaryAxisSizingMode" in node ? node.primaryAxisSizingMode : null,
-    counterAxisSizingMode: "counterAxisSizingMode" in node ? node.counterAxisSizingMode : null,
+    primaryAxisSizingMode:
+      "primaryAxisSizingMode" in node ? node.primaryAxisSizingMode : null,
+    counterAxisSizingMode:
+      "counterAxisSizingMode" in node ? node.counterAxisSizingMode : null,
     layoutGrow: "layoutGrow" in node ? node.layoutGrow : null,
     layoutMode: "layoutMode" in node ? node.layoutMode : null,
-    layoutSizingHorizontal: "layoutSizingHorizontal" in node ? node.layoutSizingHorizontal : null,
-    layoutSizingVertical: "layoutSizingVertical" in node ? node.layoutSizingVertical : null,
+    layoutSizingHorizontal:
+      "layoutSizingHorizontal" in node ? node.layoutSizingHorizontal : null,
+    layoutSizingVertical:
+      "layoutSizingVertical" in node ? node.layoutSizingVertical : null,
     maxWidth: "maxWidth" in node ? node.maxWidth : null,
     characters: "characters" in node ? node.characters : null,
     maxHeight: "maxHeight" in node ? node.maxHeight : null,
@@ -45,17 +54,22 @@ export function figmaNodeToJson(node: SceneNode, promises: any[] = []) {
     minHeight: "minHeight" in node ? node.minHeight : null,
     constraints: "constraints" in node ? node.constraints : null,
     clipsContent: "clipsContent" in node ? node.clipsContent : null,
-    counterAxisAlignItems: "counterAxisAlignItems" in node ? node.counterAxisAlignItems : null,
-    primaryAxisAlignItems: "primaryAxisAlignItems" in node ? node.primaryAxisAlignItems : null,
+    counterAxisAlignItems:
+      "counterAxisAlignItems" in node ? node.counterAxisAlignItems : null,
+    primaryAxisAlignItems:
+      "primaryAxisAlignItems" in node ? node.primaryAxisAlignItems : null,
+    fillStyleId: "fillStyleId" in node ? node.fillStyleId : null,
     strokes: "strokes" in node ? node.strokes : null,
-    componentPropertyDefinitions: "componentPropertyDefinitions" in node && node.type === "COMPONENT_SET"
-      ? node.componentPropertyDefinitions
-      : null,
+    componentPropertyDefinitions:
+      "componentPropertyDefinitions" in node && node.type === "COMPONENT_SET"
+        ? node.componentPropertyDefinitions
+        : null,
     paddingLeft: "paddingLeft" in node ? node.paddingLeft : null,
     paddingRight: "paddingRight" in node ? node.paddingRight : null,
     paddingTop: "paddingTop" in node ? node.paddingTop : null,
     paddingBottom: "paddingBottom" in node ? node.paddingBottom : null,
-    layoutPositioning: "layoutPositioning" in node ? node.layoutPositioning : null,
+    layoutPositioning:
+      "layoutPositioning" in node ? node.layoutPositioning : null,
     top: "top" in node ? node.top : null,
     bottom: "bottom" in node ? node.bottom : null,
     left: "left" in node ? node.left : null,
@@ -63,15 +77,16 @@ export function figmaNodeToJson(node: SceneNode, promises: any[] = []) {
     corderRadius: "corderRadius" in node ? node.corderRadius : null,
     overflow: "overflow" in node ? node.overflow : null,
     itemSpacing: "itemSpacing" in node ? node.itemSpacing : null,
-    mainComponent: "mainComponent" in node
-      ? {
-        ...figmaNodeToJson(node.mainComponent as any, promises),
-        parent: figmaNodeToJson(
-          node.mainComponent!.parent as any,
-          promises
-        ),
-      }
-      : null,
+    mainComponent:
+      "mainComponent" in node
+        ? {
+            ...figmaNodeToJson(node.mainComponent as any, promises),
+            parent: figmaNodeToJson(
+              node.mainComponent!.parent as any,
+              promises
+            ),
+          }
+        : null,
     effects: "effects" in node ? node.effects : null,
     visible: "visible" in node ? node.visible : null,
   };

@@ -8,6 +8,8 @@ import { addMessageEventListener } from "./addMessageEventListener";
 import { nullToUndefinedRecursive } from "./nullToUndefinedRecursive";
 import { toTailwindHtml } from "../tailwind-converter/toTailwindHtml";
 import { changeToProps } from "../tailwind-converter/changeToProps";
+import { convertToCssAvairableName } from "../../../../examples/src/code-writer/convertToCssAvairableName";
+import { colorToHex } from "../../plugin/colorToHex";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
@@ -17,8 +19,22 @@ export function App() {
     return addMessageEventListener("selection", (message) => {
       const preview = document.getElementById("preview");
       if (!preview) return;
-      const { componentSet, componentIndex } = message;
+      const { componentSet, componentIndex, context } = message;
       linkParent(componentSet);
+      const colors = {};
+      for (const color of context.colors) {
+        colors[convertToCssAvairableName(color.name)] = colorToHex(
+          color.paint.color,
+          color.paint.opacity
+        );
+      }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: colors,
+          },
+        },
+      };
       const webNode = nullToUndefinedRecursive(
         figmaNode2WebNode(componentSet, componentSet)
       );

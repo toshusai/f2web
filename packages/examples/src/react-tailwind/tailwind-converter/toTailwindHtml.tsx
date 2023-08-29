@@ -5,13 +5,13 @@ import {
   LayoutProps,
   StrokeProps,
 } from "../../../../core/src";
-import { layoutToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/layoutToClasses";
-import { dimensionToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/dimensionToClasses";
-import { effectToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/effectToClasses";
-import { textPropsToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/textPropsToClasses";
-import { strokesToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/strokesToClasses";
+import { layoutToClasses } from "./layoutToClasses";
+import { dimensionToClasses } from "./dimensionToClasses";
+import { fillToClasses } from "./fillToClasses";
+import { effectToClasses } from "./effectToClasses";
+import { textPropsToClasses } from "./textPropsToClasses";
+import { strokesToClasses } from "./strokesToClasses";
 import { TextProps } from "../../../../core/src/types/TextProps";
-import { fillToClasses } from "../../../../examples/src/react-tailwind/tailwind-converter/fillToClasses";
 
 export function toTailwindHtml(webNode: WebNode) {
   const props = webNode.props;
@@ -52,7 +52,7 @@ export function toTailwindHtml(webNode: WebNode) {
     : "text" in props && typeof props.text === "function"
     ? props.text()
     : "";
-  const html = `<${tag} class="${classes.join(" ")}" ${Object.entries(
+  const html = `<${tag} className="${classes.join(" ")}" ${Object.entries(
     attrs
   ).map(([key, value]) => `${key}="${value}"`)}>${child}</${tag}>`;
   return html;

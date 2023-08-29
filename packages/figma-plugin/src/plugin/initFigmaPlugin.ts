@@ -14,6 +14,10 @@ export function initFigmaPlugin() {
     figma.on("selectionchange", () => {
       postCreate();
       createBySelection();
+      const node = figma.currentPage.selection[0] as InstanceNode
+      const t = node.componentProperties[0]
+      if(t.type === "INSTANCE_SWAP"){
+      }
     });
     figma.on("documentchange", () => {
       postCreate();

@@ -1,6 +1,8 @@
 import { StrokeProps } from "../../../../core/src";
 import { rgbaToHex } from "./utils/rgbaToHex";
 
+declare const tailwind: any;
+
 export function strokesToClasses(props: StrokeProps) {
   const classes: string[] = [];
   if (
@@ -17,16 +19,7 @@ export function strokesToClasses(props: StrokeProps) {
   }
   if (props.borderColor !== undefined) {
     const cssKey = `${rgbaToHex(props.borderColor)}`;
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            [cssKey]: props.borderColor,
-            ...tailwind.config.theme?.extend?.colors,
-          },
-        },
-      },
-    };
+
     classes.push(`before:border-${cssKey}`);
   }
   if (props.borderTop !== undefined) {
