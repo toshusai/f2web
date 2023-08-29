@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { toTailwindHtml } from "../toTailwindHtml";
-import { changeToProps } from "../changeToProps";
 import { figmaNode2WebNode } from "../../../../web/src";
 import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
@@ -8,6 +6,8 @@ import hljs from "highlight.js";
 import { linkParent } from "./linkParent";
 import { addMessageEventListener } from "./addMessageEventListener";
 import { nullToUndefinedRecursive } from "./nullToUndefinedRecursive";
+import { toTailwindHtml } from "../tailwind-converter/toTailwindHtml";
+import { changeToProps } from "../tailwind-converter/changeToProps";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
