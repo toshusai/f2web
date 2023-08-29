@@ -11,7 +11,7 @@ import { fillToClasses } from "./fillToClasses";
 import { effectToClasses } from "./effectToClasses";
 import { textPropsToClasses } from "./textPropsToClasses";
 import { strokesToClasses } from "./strokesToClasses";
-import { TextProps } from "../TextProps";
+import { TextProps } from "../../../../core/src/types/TextProps";
 
 export function toTailwindHtml(webNode: WebNode) {
   const props = webNode.props;

@@ -1,4 +1,4 @@
-import { TextProps } from "../TextProps";
+import { TextProps } from "../../../../core/src/types/TextProps";
 
 export function textPropsToClasses(props: TextProps) {
   const classes: string[] = [];

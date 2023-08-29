@@ -5,3 +5,4 @@ export * from "./Layout";
 export * from "./LayoutProps";
 export * from "./Size";
 export * from "./StrokeProps";
+export * from "./TextProps";
