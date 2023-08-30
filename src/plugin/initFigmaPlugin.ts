@@ -1,6 +1,8 @@
-import { convertToCssAvairableName } from "../../packages/examples/src/code-writer/convertToCssAvairableName";
 import { colorToHex } from "./colorToHex";
-import { figmaNodeToDomNode } from "./converter/figmaNodeToDomNode";
+import {
+  convertToCssAvairableName,
+  figmaNodeToDomNode,
+} from "./converter/figmaNodeToDomNode";
 import { domNodeToHtml } from "./converter/domNodeToHtml";
 
 /**
@@ -21,7 +23,7 @@ type Colors = {
  *     "color-secondary": "#ffffff"
  *   },
  * }
- * 
+ *
  */
 type CssVars = Record<string, Record<string, string>>;
 
@@ -97,35 +99,42 @@ export function initFigmaPlugin() {
       }
     });
     figma.on("selectionchange", async () => {
-      const node = figma.currentPage.selection[0];
-      if (!node) return;
-      if (node.type !== "COMPONENT_SET") return;
-      const ctx: any = {
-        root: node,
-        ignoreInstance: true,
-      };
-      const domNode = await figmaNodeToDomNode(node.children[0], ctx);
-      if (!domNode) return;
-      const html = domNodeToHtml(domNode, 0, true);
-
-      ctx.ignoreInstance = false;
-      const rawDomNode = await figmaNodeToDomNode(node.children[0], ctx);
-      if (!rawDomNode) return;
-
-      const cssVars = createCssVars();
-      if (ctx.colors) {
-        colorsToCssVars(ctx.colors, cssVars);
-      }
-      figma.ui.postMessage({
-        type: "selection",
-        message: {
-          domNode: rawDomNode,
-          html: html,
-          ctx: ctx,
-          cssVars,
-        },
-      });
+      await postPreviewMessage();
+    });
+    figma.on("run", async () => {
+      await postPreviewMessage();
     });
     figma.on("documentchange", () => {});
   }
+}
+
+async function postPreviewMessage() {
+  const node = figma.currentPage.selection[0];
+  if (!node) return;
+  if (node.type !== "COMPONENT_SET") return;
+  const ctx: any = {
+    root: node,
+    ignoreInstance: true,
+  };
+  const domNode = await figmaNodeToDomNode(node.children[0], ctx);
+  if (!domNode) return;
+  const html = domNodeToHtml(domNode, 0, true);
+
+  ctx.ignoreInstance = false;
+  const rawDomNode = await figmaNodeToDomNode(node.children[0], ctx);
+  if (!rawDomNode) return;
+
+  const cssVars = createCssVars();
+  if (ctx.colors) {
+    colorsToCssVars(ctx.colors, cssVars);
+  }
+  figma.ui.postMessage({
+    type: "selection",
+    message: {
+      domNode: rawDomNode,
+      html: html,
+      ctx: ctx,
+      cssVars,
+    },
+  });
 }

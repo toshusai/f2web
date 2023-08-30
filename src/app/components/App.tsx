@@ -3,8 +3,8 @@ import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
 import hljs from "highlight.js";
 import { addMessageEventListener } from "../addMessageEventListener";
-import { convertToCssAvairableName } from "../../../packages/examples/src/code-writer/convertToCssAvairableName";
 import { getReactSrc } from "../../plugin/converter/getReactSrc";
+import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
@@ -41,7 +41,6 @@ export function App() {
       if (ctx.images) {
         Object.keys(ctx.images).forEach((key) => {
           const uint8 = ctx.images[key];
-          console.log(uint8);
           const url = URL.createObjectURL(
             new Blob([uint8], { type: "image/png" })
           );
@@ -74,9 +73,10 @@ export function App() {
       requestAnimationFrame(() => {
         const rect = preview.firstElementChild?.getBoundingClientRect();
         if (!rect) return;
+        const bodyRect = document.body.getBoundingClientRect();
         const size = {
-          w: rect.width + 32,
-          h: rect.height + 64,
+          w: Math.round(rect.width) + 32,
+          h: bodyRect.height,
         };
         parent.postMessage(
           { pluginMessage: { type: "resize", size: size } },

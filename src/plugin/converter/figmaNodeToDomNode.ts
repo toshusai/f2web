@@ -156,7 +156,7 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
 
   // height
   if (node.layoutSizingVertical === "HUG") {
-    classes.push("h-auto");
+    classes.push("h-fit");
   } else if (node.layoutSizingVertical === "FIXED") {
     classes.push(`h-[${node.height}px]`);
   } else if (node.layoutSizingVertical === "FILL") {
@@ -171,7 +171,7 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
 
   // width
   if (node.layoutSizingHorizontal === "HUG") {
-    classes.push("w-auto");
+    classes.push("w-fit");
   } else if (node.layoutSizingHorizontal === "FIXED") {
     classes.push(`w-[${node.width}px]`);
   } else if (node.layoutSizingHorizontal === "FILL") {
@@ -262,6 +262,12 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
         classes.push("flex");
         classes.push("flex-col");
       }
+      // https://www.figma.com/plugin-docs/api/properties/nodes-layoutwrap/
+      if (node.layoutWrap === "WRAP" && node.layoutMode === "HORIZONTAL") {
+        classes.push("flex-wrap");
+        classes.push("[&>*]:flex-1");
+      }
+
       if (node.primaryAxisAlignItems === "MIN") {
         classes.push("justify-start");
         if (node.counterAxisAlignItems === "MIN") {
@@ -491,7 +497,6 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
               .getImageByHash(fill.imageHash)
               ?.getBytesAsync();
             ctx.images = ctx.images ?? {};
-            console.log(res);
             ctx.images[fill.imageHash] = res;
             classes.push(`img=${fill.imageHash}`);
           }
