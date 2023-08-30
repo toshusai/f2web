@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
-
+import hljs from "highlight.js";
 import { addMessageEventListener } from "./addMessageEventListener";
 import { convertToCssAvairableName } from "../../../packages/examples/src/code-writer/convertToCssAvairableName";
 declare const prettierPlugins: any;
@@ -40,6 +40,11 @@ export function App() {
       if (!firstTheme) return;
       preview.setAttribute("data-theme", firstTheme);
 
+      const codeContent = document.getElementById("code-content");
+      if (!codeContent) return;
+      codeContent.textContent = html + "\n\n" + JSON.stringify(ctx, null, 2);
+      hljs.highlightAll();
+
       tailwind.config = {
         theme: {
           extend: {
@@ -60,7 +65,7 @@ export function App() {
           lineHeight: "10px",
         }}
       >
-        <code className="language-html" id="code-content"></code>
+        <code className="language-typescript" id="code-content"></code>
       </pre>
       <Resize />
     </div>

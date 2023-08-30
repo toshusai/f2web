@@ -1,6 +1,6 @@
 import { convertToCssAvairableName } from "../../packages/examples/src/code-writer/convertToCssAvairableName";
 import { colorToHex } from "./colorToHex";
-import { nodeToTailwindHtml } from "./converter/dimensions";
+import { getReactSrc } from "./converter/dimensions";
 
 export function initFigmaPlugin() {
   if (typeof figma !== "undefined") {
@@ -16,8 +16,10 @@ export function initFigmaPlugin() {
       const node = figma.currentPage.selection[0];
       if (!node) return;
       if (node.type !== "COMPONENT_SET") return;
-      const ctx: any = {};
-      const html = nodeToTailwindHtml(node.children[0], ctx);
+      const ctx: any = {
+        root: node,
+      };
+      const html = getReactSrc(node.children[0], ctx);
 
       const cssVars: any = {};
       const colors = figma.variables.getLocalVariables("COLOR");

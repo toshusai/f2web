@@ -2,6 +2,37 @@ import { convertToCssAvairableName } from "../../../packages/examples/src/code-w
 import { isMixed } from "../../../packages/web/src/utils";
 import { colorToHex } from "../colorToHex";
 
+export function getReactSrc(node: SceneNode, ctx: any) {
+  ctx.depth = 2;
+  const jsx = nodeToTailwindHtml(node, ctx);
+
+  return `export function ${"Component"}(${contextPropsToReactPropsString(
+    ctx.props
+  )}) {
+  return (
+${jsx}
+  )
+}
+`;
+}
+
+export function contextPropsToReactPropsString(props: any) {
+  if (!props) return "";
+  const keys = Object.keys(props);
+  const indent = "  ".repeat(2);
+  if (keys.length === 0) return "";
+  return `props: {
+${keys
+  .map((key) => `${indent}${key}: ${type2TypeScriptType(props[key])};`)
+  .join("\n")}
+}`;
+}
+function type2TypeScriptType(type: string) {
+  if (type === "TEXT") return "string";
+  if (type === "INSTANCE") return "React.ReactNode";
+  return type;
+}
+
 export function supportedNodes(
   node: SceneNode
 ): node is
@@ -18,22 +49,68 @@ export function supportedNodes(
   );
 }
 
-export function nodeToTailwindHtml(node: SceneNode, ctx: any = {}) {
+export function variantToProps(node: ComponentSetNode) {
+  const props = {};
+  Object.keys(node.variantGroupProperties).forEach((key) => {
+    const value = node.variantGroupProperties[key];
+    props[convertToVariantAvairableName(key)] = value.values
+      .map((x) => `"${x}"`)
+      .join(" | ");
+  });
+  return props;
+}
+
+export function nodeToTailwindHtml(node: SceneNode, ctx: any) {
+  if (!ctx.depth) ctx.depth = 0;
+  if (node.parent?.type === "COMPONENT_SET") {
+    ctx.props = {
+      ...variantToProps(node.parent),
+    };
+  }
+  const indent = "  ".repeat(ctx.depth);
+  const childIndent = "  ".repeat(ctx.depth + 1);
   if (!supportedNodes(node)) return "";
+  ctx.depth++;
   const classes = convertToClasses(node, ctx);
+  ctx.depth--;
   if (node.type === "FRAME" || node.type === "COMPONENT") {
+    ctx.depth++;
     const children = node.children.map((child) =>
       nodeToTailwindHtml(child, ctx)
     );
-    return `<div class="${classes.join(" ")}">${children.join("")}</div>`;
+    ctx.depth--;
+    const childrenString = children.join("");
+    const joinedClasses = classes.join(" ");
+    if (childrenString === "") {
+      return `${indent}<div class="${joinedClasses}"></div>\n`;
+    }
+    return `${indent}<div class="${joinedClasses}">\n${childrenString}${indent}</div>\n`;
   }
 
   if (node.type === "INSTANCE") {
-    return handleInstanceNode(node);
+    ctx.depth++;
+    const r = handleInstanceNode(node, ctx);
+    ctx.depth--;
+    return r;
   }
 
   if (node.type === "TEXT") {
-    return `<div class="${classes.join(" ")}">${node.characters}</div>`;
+    if (node.componentPropertyReferences?.characters) {
+      for (const key in ctx.root.componentPropertyDefinitions) {
+        if (node.componentPropertyReferences.characters === key) {
+          ctx.props = ctx.props ?? {};
+          ctx.props[convertToVariantAvairableName(key)] = "TEXT";
+          return `${indent}<div class="${classes.join(
+            " "
+          )}">\n${childIndent}{props.${convertToVariantAvairableName(
+            key
+          )}}\n${indent}</div>\n`;
+        }
+      }
+    }
+    return `${indent}<div class="${classes.join(" ")}">\n${childIndent}${
+      node.characters
+    }\n${indent}</div>\n`;
   }
   return "";
 }
@@ -42,14 +119,26 @@ export function convertToVariantAvairableName(name: string) {
   return name.replace(/[ #:]/g, "");
 }
 
-function handleInstanceNode(node: InstanceNode) {
+function handleInstanceNode(node: InstanceNode, ctx: any) {
   if (!node.mainComponent) {
     throw new Error("node.mainComponent is null");
+  }
+  const indent = "  ".repeat(ctx.depth);
+  if (node.componentPropertyReferences?.mainComponent) {
+    for (const key in ctx.root.componentPropertyDefinitions) {
+      if (node.componentPropertyReferences.mainComponent === key) {
+        ctx.props = ctx.props ?? {};
+        ctx.props[convertToVariantAvairableName(key)] = "INSTANCE";
+        return `${indent}{props.${convertToVariantAvairableName(key)}}\n`;
+      }
+    }
   }
 
   const mainComponent = node.mainComponent;
   const tag = mainComponent.parent?.name;
   if (!tag) throw new Error("tag is null");
+  ctx.dependencies = ctx.dependencies ?? {};
+  ctx.dependencies[tag] = "INSTANCE";
 
   let attrString: string[] = [];
   Object.entries(node.componentProperties).forEach(([key, value]) => {
@@ -79,15 +168,17 @@ function handleInstanceNode(node: InstanceNode) {
         })
         .join(" ");
 
+      ctx.dependencies = ctx.dependencies ?? {};
+      ctx.dependencies[convertToVariantAvairableName(name)] = "INSTANCE";
       const html = `${attrKey}={<${convertToVariantAvairableName(
         name
       )} ${nameToTag} />}`;
       attrString.push(html);
     }
   });
-  return `<${tag}${
+  return `${indent}<${tag}${
     attrString.length > 0 ? ` ${attrString.join(" ")}` : ""
-  }></${tag}>`;
+  }></${tag}>\n`;
 }
 
 export function convertToClasses(node: SceneNode, ctx: any = {}) {
@@ -381,6 +472,7 @@ export function convertToClasses(node: SceneNode, ctx: any = {}) {
     const name = convertToCssAvairableName(node.fillStyleId);
     ctx.colors[name] = node.fillStyleId;
     classes.push(`bg-${name}`);
+    console.log(ctx.colors);
   } else {
     if (isMixed(node.fills)) throw new Error("isMixed");
     if (node.fills.length === 1) {

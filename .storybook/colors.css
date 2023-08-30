@@ -1,0 +1,14 @@
+:root[data-theme="Hoge"] {
+  --Color: #ffffffff;
+  --Text: #1c1c1cff;
+  --SubText: #676767ff;
+  --Link: #3965ffff;
+  --ButtonBGHover: #dbdbdbff;
+  --Linkhover: #1849f9ff;
+}
+:root[data-theme="Mode 1"] {
+  --Text: #ffffffff;
+}
+:root {
+  --ButtonBG: #eeeeeeff;
+}
