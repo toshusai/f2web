@@ -1839,6 +1839,7 @@ __metadata:
     "@types/react-dom": ^18.0.6
     "@types/styled-components": ^5.1.26
     autoprefixer: ^10.4.15
+    blob-polyfill: ^7.0.20220408
     css-loader: ^6.7.1
     highlight.js: ^11.8.0
     html-webpack-plugin: ^5.5.0
@@ -5314,6 +5315,13 @@ __metadata:
     inherits: ^2.0.4
     readable-stream: ^3.4.0
   checksum: 9e8521fa7e83aa9427c6f8ccdcba6e8167ef30cc9a22df26effcc5ab682ef91d2cbc23a239f945d099289e4bbcfae7a192e9c28c84c6202e710a0dfec3722662
+  languageName: node
+  linkType: hard
+
+"blob-polyfill@npm:^7.0.20220408":
+  version: 7.0.20220408
+  resolution: "blob-polyfill@npm:7.0.20220408"
+  checksum: bbd062e904d851b0e0a733265150d0c189a575f80a98256515d265e265ada6f92a787d43fedaa791c00910c174131f9d7168e8c158e3334c965d045358c177da
   languageName: node
   linkType: hard
 
