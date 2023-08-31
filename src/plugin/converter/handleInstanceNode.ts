@@ -1,8 +1,8 @@
-import { convertToVariantAvairableName } from "./figmaNodeToDomNode";
+import { Context, convertToVariantAvairableName } from "./figmaNodeToDomNode";
 import { AttrValue } from "./AttrValue";
 import { DomNode } from "./DomNode";
 
-export function handleInstanceNode(node: InstanceNode, ctx: any): DomNode {
+export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   if (!node.mainComponent) {
     throw new Error("node.mainComponent is null");
   }
@@ -10,7 +10,10 @@ export function handleInstanceNode(node: InstanceNode, ctx: any): DomNode {
     for (const key in ctx.root.componentPropertyDefinitions) {
       if (node.componentPropertyReferences.mainComponent === key) {
         ctx.props = ctx.props ?? {};
-        ctx.props[convertToVariantAvairableName(key)] = "INSTANCE";
+        ctx.props[convertToVariantAvairableName(key)] = {
+          type: "INSTANCE",
+          defaultValue: node.mainComponent.id,
+        };
         return {
           type: "text",
           value: `{props.${convertToVariantAvairableName(key)}}`,

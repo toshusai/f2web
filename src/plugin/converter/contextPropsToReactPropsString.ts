@@ -7,7 +7,7 @@ export function contextPropsToReactPropsString(props: any) {
   if (keys.length === 0) return "";
   return `props: {
 ${keys
-  .map((key) => `${indent}${key}: ${type2TypeScriptType(props[key])};`)
+  .map((key) => `${indent}${key}: ${type2TypeScriptType(props[key].type)};`)
   .join("\n")}
 }`;
 }
