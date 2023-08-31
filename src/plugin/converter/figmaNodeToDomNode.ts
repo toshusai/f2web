@@ -64,7 +64,10 @@ export async function figmaNodeToDomNode(
       return {
         type: "img",
         attrs: {
-          src: img.replace("img=", ""),
+          src: {
+            type: "variable",
+            value: `props.${img.replace("img=", "")}`,
+          },
           class: classes.join(" "),
         },
       };
@@ -205,6 +208,10 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
       if (typeof node.lineHeight === "number") {
         classes.push(`leading-[${node.lineHeight}px]`);
       }
+      if (isMixed(node.lineHeight)) throw new Error("isMixed lineHeight");
+      if (isMixed(node.fontSize)) throw new Error("isMixed fontSize");
+      const h = Math.round(node.fontSize * 1.2);
+      classes.push(`leading-[${h}px]`);
     }
 
     if (node.fontWeight) {
@@ -473,7 +480,7 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
             const color = figma.variables.getVariableById(id);
             if (!id) throw new Error("id is null");
             if (!color) throw new Error("color is null");
-            const name = convertToCssAvairableName(color.name);
+            const name = convertToCssAvairableName(color.id);
             if (!ctx.colors) ctx.colors = {};
             if (color?.resolvedType === "COLOR") {
               ctx.colors[name] = color.id;
@@ -498,6 +505,9 @@ export async function convertToClasses(node: SceneNode, ctx: any = {}) {
               ?.getBytesAsync();
             ctx.images = ctx.images ?? {};
             ctx.images[fill.imageHash] = res;
+            ctx.props = ctx.props ?? {};
+            ctx.props[fill.imageHash] = "TEXT";
+
             classes.push(`img=${fill.imageHash}`);
           }
         }

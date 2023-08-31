@@ -66,15 +66,43 @@ function colorsToCssVars(colors: Colors, cssVars: CssVars) {
 function createCssVars() {
   const cssVars: CssVars = {};
   const colors = figma.variables.getLocalVariables("COLOR");
+  const allColors = {};
+  const paints = figma.getLocalPaintStyles();
+  paints.forEach((paint) => {
+    const p = paint.paints[0];
+    const name = convertToCssAvairableName(paint.name);
+    allColors[convertToCssAvairableName(paint.id)] = `var(--${name})`;
+
+    if (p.type === "SOLID") {
+      if (cssVars["__default__"] === undefined) cssVars["__default__"] = {};
+      cssVars["__default__"][name] = colorToHex(p.color, p.opacity ?? 1);
+    } else if (p.type === "GRADIENT_LINEAR") {
+      if (cssVars["__default__"] === undefined) cssVars["__default__"] = {};
+      cssVars["__default__"][name] = `linear-gradient(45deg, ${p.gradientStops
+        .map((stop) => `${colorToHex(stop.color, 1)} ${stop.position * 100}%`)
+        .join(", ")})`;
+    }
+  });
+
   colors.forEach((variable) => {
     const collection = figma.variables.getVariableCollectionById(
       variable.variableCollectionId
     );
+    const variableName = convertToCssAvairableName(
+      collection?.name + "/" + variable.name
+    );
+    allColors[
+      convertToCssAvairableName(variable.id)
+    ] = `var(--${variableName})`;
     if (!collection) return;
-    collection.modes.forEach((mode) => {
-      if (cssVars[mode.name] === undefined) cssVars[mode.name] = {};
+    collection.modes.forEach((mode, i) => {
+      let name = mode.name;
+      if (i === 0) {
+        name = "__default__";
+      }
+      if (cssVars[name] === undefined) cssVars[name] = {};
       const value = variable.valuesByMode[mode.modeId] as RGBA;
-      cssVars[mode.name][variable.name] =
+      cssVars[name][variableName] =
         colorToHex(
           {
             r: value.r,
@@ -85,7 +113,10 @@ function createCssVars() {
         ) ?? "";
     });
   });
-  return cssVars;
+  return {
+    cssVars,
+    colors: allColors,
+  };
 }
 
 export function initFigmaPlugin() {
@@ -115,6 +146,7 @@ async function postPreviewMessage() {
   const ctx: any = {
     root: node,
     ignoreInstance: true,
+    name: node.name,
   };
   const domNode = await figmaNodeToDomNode(node.children[0], ctx);
   if (!domNode) return;
@@ -124,10 +156,11 @@ async function postPreviewMessage() {
   const rawDomNode = await figmaNodeToDomNode(node.children[0], ctx);
   if (!rawDomNode) return;
 
-  const cssVars = createCssVars();
-  if (ctx.colors) {
-    colorsToCssVars(ctx.colors, cssVars);
+  const { cssVars, colors } = createCssVars();
+  if (colors) {
+    colorsToCssVars(colors, cssVars);
   }
+  ctx.colors = colors;
   figma.ui.postMessage({
     type: "selection",
     message: {

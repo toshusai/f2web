@@ -37,7 +37,7 @@ export function domNodeToHtml(
     return `${indent}<${node.type} ${attrs}></${node.type}>\n`;
   }
   const children = node.children
-    ?.map((child) => domNodeToHtml(child, depth + 1))
+    ?.map((child) => domNodeToHtml(child, depth + 1, ignoreInstance, className))
     .join("");
   return `${indent}<${node.type} ${attrs}>\n${children}${indent}</${node.type}>\n`;
 }

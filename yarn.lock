@@ -1841,6 +1841,7 @@ __metadata:
     autoprefixer: ^10.4.15
     blob-polyfill: ^7.0.20220408
     css-loader: ^6.7.1
+    express: ^4.18.2
     highlight.js: ^11.8.0
     html-webpack-plugin: ^5.5.0
     husky: ^8.0.1
@@ -6991,7 +6992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.17.3":
+"express@npm:^4.17.3, express@npm:^4.18.2":
   version: 4.18.2
   resolution: "express@npm:4.18.2"
   dependencies:

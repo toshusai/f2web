@@ -3,7 +3,7 @@ import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
 import hljs from "highlight.js";
 import { addMessageEventListener } from "../addMessageEventListener";
-import { getReactSrc } from "../../plugin/converter/getReactSrc";
+import { getReactSrc, getStoriesSrc } from "../../plugin/converter/getReactSrc";
 import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
 
 declare const prettierPlugins: any;
@@ -12,7 +12,7 @@ declare const prettier: any;
 function cssVarsToCssText(cssVars: any) {
   let css = "";
   Object.keys(cssVars).forEach((theme) => {
-    let themeCss = `#preview`;
+    let themeCss = `:root`;
     if (theme === "__default__") {
       themeCss += ` {`;
     } else {
@@ -28,6 +28,19 @@ function cssVarsToCssText(cssVars: any) {
     css += themeCss;
   });
   return css;
+}
+
+async function post(path: string, body: any) {
+  const res = await fetch("http://localhost:3000" + path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json();
+  return json;
 }
 
 export function App() {
@@ -59,7 +72,19 @@ export function App() {
 
       const codeContent = document.getElementById("code-content");
       if (!codeContent) return;
-      codeContent.textContent = getReactSrc(domNode, ctx);
+      const src = getReactSrc(domNode, ctx);
+      const stories = getStoriesSrc(ctx);
+      const colorsCss = cssVarsToCssText(cssVars)
+      const tailwindColors = `export default ${JSON.stringify(ctx.colors)}`;
+
+      post("/api/v1/create", {
+        src,
+        name: ctx.name,
+        stories,
+        colorsCss,
+        tailwindColors,
+      });
+      codeContent.textContent = src;
       hljs.highlightAll();
 
       tailwind.config = {

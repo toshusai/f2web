@@ -11,9 +11,35 @@ ${Object.keys(ctx.dependencies ?? {})
     return `import { ${key} } from "./${key}";\n`;
   })
   .join("")}
-export function ${"Component"}(${contextPropsToReactPropsString(ctx.props)}) {
+export function ${ctx.name}(${contextPropsToReactPropsString(ctx.props)}) {
   return (
 ${jsx}  )
 }
+`;
+}
+
+export function getStoriesSrc(ctx: any) {
+  const name = ctx.name;
+  return `import type { Meta, StoryObj } from "@storybook/react";
+
+import { ${name} } from "./${name}";
+
+const meta = {
+  component: ${name},
+  parameters: {
+    layout: "centered",
+  },
+} satisfies Meta<typeof ${name}>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Basic: Story = {
+  args: {
+    ${Object.keys(ctx.props ?? {})
+      .map((key) => `${key}: ${ctx.props[key].value}`)
+      .join(",\n")}
+  },
+};
 `;
 }
