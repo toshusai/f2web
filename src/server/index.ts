@@ -21,7 +21,7 @@ app.post("/api/v1/create", (req, res) => {
   fs.writeFileSync(`./src/stories/${name}.tsx`, src);
   fs.writeFileSync(`./src/stories/${name}.stories.tsx`, stories);
   fs.writeFileSync(`./.storybook/colors.css`, colorsCss);
-  fs.writeFileSync(`./color.js`, tailwindColors);
+  fs.writeFileSync(`./colors.js`, tailwindColors);
   res.send({
     status: "ok",
   });

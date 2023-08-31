@@ -1,6 +1,7 @@
 import { Context, convertToVariantAvairableName } from "./figmaNodeToDomNode";
 import { AttrValue } from "./AttrValue";
 import { DomNode } from "./DomNode";
+import { parseDomName } from "../initFigmaPlugin";
 
 export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   if (!node.mainComponent) {
@@ -23,12 +24,23 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   }
 
   const mainComponent = node.mainComponent;
-  const tag = mainComponent.parent?.name;
+  if (!mainComponent) throw new Error("mainComponent is null");
+  if (!mainComponent.parent) throw new Error("mainComponent.parent is null");
+  const tag = parseDomName(mainComponent.parent?.name).name;
   if (!tag) throw new Error("tag is null");
   ctx.dependencies = ctx.dependencies ?? {};
   ctx.dependencies[tag] = "INSTANCE";
 
   const attrs: Record<string, AttrValue> = {};
+  const domName = parseDomName(node.name);
+  if (domName.meta.attributes.length > 0) {
+    domName.meta.attributes.forEach((attr) => {
+      attrs[attr] = {
+        type: "variable",
+        value: `props.${convertToVariantAvairableName(attr)}`,
+      };
+    });
+  }
   Object.entries(node.componentProperties).forEach(([key, value]) => {
     const attrKey = convertToVariantAvairableName(key);
     if (value.type === "TEXT") {

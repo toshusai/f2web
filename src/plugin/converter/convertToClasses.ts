@@ -1,7 +1,10 @@
 import { colorToHex } from "../colorToHex";
 import { supportedNodes } from "./supportedNodes";
-import { Context, isMixed, convertToCssAvairableName } from "./figmaNodeToDomNode";
-
+import {
+  Context,
+  isMixed,
+  convertToCssAvairableName,
+} from "./figmaNodeToDomNode";
 
 export async function convertToClasses(node: SceneNode, ctx: Context) {
   if (!supportedNodes(node)) return [];
@@ -224,7 +227,7 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
           const color = figma.variables.getVariableById(id);
           if (!id) throw new Error("id is null");
           if (!color) throw new Error("color is null");
-          const name = convertToCssAvairableName(color.name);
+          const name = convertToCssAvairableName(color.id);
           if (!ctx.colors) ctx.colors = {};
           if (color?.resolvedType === "COLOR") {
             ctx.colors[name] = color.id;
@@ -245,10 +248,12 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
       }
 
       if (node.type !== "VECTOR") {
-        if (node.strokeBottomWeight ||
+        if (
+          node.strokeBottomWeight ||
           node.strokeTopWeight ||
           node.strokeLeftWeight ||
-          node.strokeRightWeight) {
+          node.strokeRightWeight
+        ) {
           classes.push("before:content-''");
           classes.push("before:absolute");
           classes.push("before:inset-0");
@@ -286,7 +291,9 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
       if (effect.type === "DROP_SHADOW") {
         const hex = colorToHex(effect.color, effect.color.a ?? 1);
         classes.push(
-          `shadow-[${effect.offset.x}px_${effect.offset.y}px_${effect.radius}px_${effect.spread ?? 0}_${hex}]`
+          `shadow-[${effect.offset.x}px_${effect.offset.y}px_${
+            effect.radius
+          }px_${effect.spread ?? 0}_${hex}]`
         );
       }
     }

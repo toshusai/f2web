@@ -5,6 +5,7 @@ import { handleInstanceNode } from "./handleInstanceNode";
 import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
 import { convertToClasses } from "./convertToClasses";
+import { DomMeta, parseDomName } from "../initFigmaPlugin";
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
     return false;
@@ -35,10 +36,11 @@ export type Context = {
     [key: string]: string;
   };
   depth?: number;
+  meta?: DomMeta;
 };
 export type Props = {
   [key: string]: {
-    type: "string" | "INSTANCE" | string[];
+    type: string | "INSTANCE" | string[];
     defaultValue?: string;
   };
 };
@@ -48,15 +50,49 @@ export async function figmaNodeToDomNode(
   ctx: Context
 ): Promise<DomNode | null> {
   if (!ctx.depth) ctx.depth = 0;
+
+  let attrs: Record<
+    string,
+    {
+      type: "variable";
+      value: string;
+    }
+  > = {};
   if (node.parent?.type === "COMPONENT_SET") {
     ctx.props = {
       ...variantToProps(node.parent),
     };
+
+    if (ctx.meta) {
+      ctx.meta.attributes.forEach((attr) => {
+        attrs[attr] = {
+          type: "variable",
+          value: `props.${convertToVariantAvairableName(attr)}`,
+        };
+        ctx.props = ctx.props ?? {};
+        ctx.props[convertToVariantAvairableName(attr)] = {
+          type: "?() => void",
+          defaultValue: "",
+        };
+      });
+    }
   }
+
+  const domName = parseDomName(node.name);
+  if (domName.meta.attributes.length > 0) {
+    domName.meta.attributes.forEach((attr) => {
+      ctx.props = ctx.props ?? {};
+      ctx.props[convertToVariantAvairableName(attr)] = {
+        type: "?() => void",
+        defaultValue: "",
+      };
+    });
+  }
+
   if (!supportedNodes(node)) return null;
   if (!node.visible) {
     return {
-      type: "div",
+      type: ctx.meta?.tagName ?? "div",
       attrs: {
         class: "hidden",
       },
@@ -71,7 +107,8 @@ export async function figmaNodeToDomNode(
     const res = await node.exportAsync({ format: "SVG" });
     const svg = new TextDecoder("utf-8").decode(res);
     return {
-      type: "div",
+      type: ctx.meta?.tagName ?? "div",
+      attrs,
       children: [
         {
           type: "text",
@@ -92,6 +129,7 @@ export async function figmaNodeToDomNode(
             value: `props.${img.replace("img=", "")}`,
           },
           class: classes.join(" "),
+          ...attrs,
         },
       };
     }
@@ -104,10 +142,15 @@ export async function figmaNodeToDomNode(
     ) as DomNode[];
     ctx.depth--;
     const joinedClasses = classes.join(" ");
+    const name =
+      node.parent?.type === "COMPONENT_SET"
+        ? ctx.meta?.tagName ?? parseDomName(node.name).name
+        : "div";
     return {
-      type: "div",
+      type: name,
       attrs: {
         class: joinedClasses,
+        ...attrs,
       },
       children: children,
     };
@@ -133,6 +176,7 @@ export async function figmaNodeToDomNode(
             type: "div",
             attrs: {
               class: classes.join(" "),
+              ...attrs,
             },
             children: [
               {
@@ -142,11 +186,6 @@ export async function figmaNodeToDomNode(
               },
             ],
           };
-          //   return `${indent}<div class="${classes.join(
-          //     " "
-          //   )}">\n${childIndent}{props.${convertToVariantAvairableName(
-          //     key
-          //   )}}\n${indent}</div>\n`;
         }
       }
     }
@@ -163,12 +202,8 @@ export async function figmaNodeToDomNode(
         },
       ],
     };
-    // return `${indent}<div class="${classes.join(" ")}">\n${childIndent}${
-    //   node.characters
-    // }\n${indent}</div>\n`;
   }
   return null;
-  //   return "";
 }
 
 export function convertToVariantAvairableName(name: string) {

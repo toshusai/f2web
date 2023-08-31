@@ -3,7 +3,8 @@ import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
 import hljs from "highlight.js";
 import { addMessageEventListener } from "../addMessageEventListener";
-import { getReactSrc, getStoriesSrc } from "../../plugin/converter/getReactSrc";
+import { getReactSrc } from "../../plugin/converter/getReactSrc";
+import { getStoriesSrc } from "../../plugin/converter/getStoriesSrc";
 import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
 
 declare const prettierPlugins: any;

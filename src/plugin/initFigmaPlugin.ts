@@ -139,6 +139,48 @@ export function initFigmaPlugin() {
   }
 }
 
+// get "div" from "<div>"
+function getTag(name: string) {
+  const reg = /<([a-zA-Z0-9-]+)(\s|>)/;
+  const result = name.match(reg);
+  if (result) {
+    return result[1];
+  }
+  return "div";
+}
+
+// get "onClick, className" from "[onClick, className]"
+function getAttribute(name: string): string[] {
+  const reg = /\[([a-zA-Z0-9-,\s]+)\]/;
+  const result = name.match(reg);
+  if (result) {
+    return result[1].split(",").map((x) => x.trim());
+  }
+  return [];
+}
+
+export type DomMeta = {
+  tagName: string;
+  attributes: string[];
+};
+
+export function parseDomName(name: string): {
+  name: string;
+  meta: DomMeta;
+} {
+  const sp = name.split("#");
+  const meta = sp[1] ?? "";
+
+  const domName = sp[0];
+  return {
+    name: convertToCssAvairableName(domName),
+    meta: {
+      tagName: getTag(meta),
+      attributes: getAttribute(meta),
+    },
+  };
+}
+
 async function postPreviewMessage() {
   const node = figma.currentPage.selection[0];
   if (!node) return;
@@ -146,7 +188,7 @@ async function postPreviewMessage() {
   const ctx: any = {
     root: node,
     ignoreInstance: true,
-    name: node.name,
+    ...parseDomName(node.name),
   };
   const domNode = await figmaNodeToDomNode(node.children[0], ctx);
   if (!domNode) return;

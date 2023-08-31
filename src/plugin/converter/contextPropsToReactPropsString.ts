@@ -5,9 +5,15 @@ export function contextPropsToReactPropsString(props: any) {
   const keys = Object.keys(props);
   const indent = "  ".repeat(1);
   if (keys.length === 0) return "";
+
   return `props: {
 ${keys
-  .map((key) => `${indent}${key}: ${type2TypeScriptType(props[key].type)};`)
+  .map((key) => {
+    const optional = props[key].type.toString().startsWith("?") ? "?" : "";
+    return `${indent}${key}${optional}: ${type2TypeScriptType(
+      props[key].type
+    )};`;
+  })
   .join("\n")}
 }`;
 }
