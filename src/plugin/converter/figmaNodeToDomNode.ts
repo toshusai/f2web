@@ -160,6 +160,15 @@ export async function figmaNodeToDomNode(
     ctx.depth++;
     const r = handleInstanceNode(node, ctx);
     ctx.depth--;
+    if (r.type !== "text" && "attrs" in r) {
+      return {
+        ...r,
+        attrs: {
+          class: classes.join(" "),
+          ...r.attrs,
+        },
+      };
+    }
     return r;
   }
 

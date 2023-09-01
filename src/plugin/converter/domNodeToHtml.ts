@@ -5,7 +5,8 @@ export function domNodeToHtml(
   node: DomNode,
   depth = 0,
   ignoreInstance = false,
-  className = false
+  className = false,
+  root = true
 ): string {
   const indent = "  ".repeat(depth);
   if (isTextDomNode(node)) {
@@ -19,7 +20,11 @@ export function domNodeToHtml(
   const attrs = Object.entries(node.attrs ?? {})
     .map(([key, value]) => {
       if (className && key === "class") {
-        return `className="${value}"`;
+        if (root) {
+          return `className={props.className ?? "${value}"}`;
+        } else {
+          return `className="${value}"`;
+        }
       }
       if (typeof value === "string") {
         return `${key}="${value}"`;
@@ -37,7 +42,9 @@ export function domNodeToHtml(
     return `${indent}<${node.type} ${attrs}></${node.type}>\n`;
   }
   const children = node.children
-    ?.map((child) => domNodeToHtml(child, depth + 1, ignoreInstance, className))
+    ?.map((child) =>
+      domNodeToHtml(child, depth + 1, ignoreInstance, className, false)
+    )
     .join("");
   return `${indent}<${node.type} ${attrs}>\n${children}${indent}</${node.type}>\n`;
 }
