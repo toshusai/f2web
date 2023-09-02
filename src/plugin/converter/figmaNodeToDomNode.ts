@@ -6,6 +6,7 @@ import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
 import { convertToClasses } from "./convertToClasses";
 import { DomMeta, parseDomName } from "../initFigmaPlugin";
+var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
     return false;
@@ -92,9 +93,12 @@ export async function figmaNodeToDomNode(
   if (!supportedNodes(node)) return null;
   if (!node.visible) {
     return {
-      type: ctx.meta?.tagName ?? "div",
+      type: "NULL", //ctx.meta?.tagName ?? "div",
       attrs: {
-        class: "hidden",
+        class: {
+          type: "value",
+          value: "hidden",
+        },
       },
     };
   }
@@ -106,17 +110,38 @@ export async function figmaNodeToDomNode(
   if (node.type === "VECTOR") {
     const res = await node.exportAsync({ format: "SVG" });
     const svg = new TextDecoder("utf-8").decode(res);
-    return {
-      type: ctx.meta?.tagName ?? "div",
-      attrs,
-      children: [
-        {
-          type: "text",
-          value: svg,
-          valueType: "string",
-        },
-      ],
+    const parser = new DomParser();
+    const svgDom = parser.parseFromString(svg);
+
+    const domToDomNode = (dom: any) => {
+      if (!dom.childNodes) return null;
+      const children = dom.childNodes
+        .map((child: any) => domToDomNode(child))
+        .filter((x: any) => x !== null);
+      const attrs: any = {};
+      dom.attributes?.forEach((attr: any) => {
+        if (attr.name === "fill") {
+          if (!isMixed(node.fills)) {
+            attrs["fill"] = "currentColor";
+            return;
+          }
+        }
+        attrs[attr.name] = attr.value;
+      });
+      return {
+        type: dom.nodeName,
+        attrs,
+        children,
+      };
     };
+
+    const svgNode = domToDomNode(svgDom.getElementsByTagName("svg")[0]);
+    if (!svgNode) throw new Error("svgNode is null");
+    svgNode.attrs.class = {
+      type: "value",
+      value: classes.join(" "),
+    };
+    return svgNode;
   }
   if (node.type === "FRAME" || node.type === "COMPONENT" || ignoreInstance) {
     const img = classes.find((c) => c.startsWith("img="));
@@ -128,7 +153,10 @@ export async function figmaNodeToDomNode(
             type: "variable",
             value: `props.${img.replace("img=", "")}`,
           },
-          class: classes.join(" "),
+          class: {
+            type: "value",
+            value: classes.join(" "),
+          },
           ...attrs,
         },
       };
@@ -148,8 +176,12 @@ export async function figmaNodeToDomNode(
         : "div";
     return {
       type: name,
+      name: node.name,
       attrs: {
-        class: joinedClasses,
+        class: {
+          value: joinedClasses,
+          type: "value",
+        },
         ...attrs,
       },
       children: children,
@@ -164,7 +196,10 @@ export async function figmaNodeToDomNode(
       return {
         ...r,
         attrs: {
-          class: classes.join(" "),
+          class: {
+            value: classes.join(" "),
+            type: "value",
+          },
           ...r.attrs,
         },
       };
@@ -184,7 +219,10 @@ export async function figmaNodeToDomNode(
           return {
             type: "div",
             attrs: {
-              class: classes.join(" "),
+              class: {
+                value: classes.join(" "),
+                type: "value",
+              },
               ...attrs,
             },
             children: [
@@ -201,7 +239,10 @@ export async function figmaNodeToDomNode(
     return {
       type: "div",
       attrs: {
-        class: classes.join(" "),
+        class: {
+          value: classes.join(" "),
+          type: "value",
+        },
       },
       children: [
         {

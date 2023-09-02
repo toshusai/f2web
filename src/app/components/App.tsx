@@ -6,6 +6,7 @@ import { addMessageEventListener } from "../addMessageEventListener";
 import { getReactSrc } from "../../plugin/converter/getReactSrc";
 import { getStoriesSrc } from "../../plugin/converter/getStoriesSrc";
 import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
+import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
@@ -47,7 +48,7 @@ async function post(path: string, body: any) {
 export function App() {
   useEffect(() => {
     return addMessageEventListener("selection", (message) => {
-      const { html, ctx, cssVars, domNode } = message;
+      const { html, ctx, cssVars, domNodes } = message;
       const preview = document.getElementById("preview");
       if (!preview) return;
 
@@ -73,9 +74,14 @@ export function App() {
 
       const codeContent = document.getElementById("code-content");
       if (!codeContent) return;
+      const domNode = domNodes[0];
+      domNodes.forEach((domNode, i) => {
+        if (i === 0) return;
+        compareTreeNode(domNodes[0], domNode, domNode.name);
+      });
       const src = getReactSrc(domNode, ctx);
       const stories = getStoriesSrc(ctx);
-      const colorsCss = cssVarsToCssText(cssVars)
+      const colorsCss = cssVarsToCssText(cssVars);
       const tailwindColors = `export default ${JSON.stringify(ctx.colors)}`;
 
       post("/api/v1/create", {
@@ -102,7 +108,7 @@ export function App() {
         const bodyRect = document.body.getBoundingClientRect();
         const size = {
           w: Math.round(rect.width) + 32,
-          h: bodyRect.height,
+          h: Math.round(bodyRect.height),
         };
         parent.postMessage(
           { pluginMessage: { type: "resize", size: size } },

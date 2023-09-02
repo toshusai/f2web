@@ -1852,6 +1852,7 @@ __metadata:
     autoprefixer: ^10.4.15
     blob-polyfill: ^7.0.20220408
     css-loader: ^6.7.1
+    dom-parser: ^0.1.6
     eslint-plugin-storybook: ^0.6.13
     express: ^4.18.2
     highlight.js: ^11.8.0
@@ -6522,6 +6523,13 @@ __metadata:
   dependencies:
     utila: ~0.4
   checksum: ea52fe303f5392e48dea563abef0e6fb3a478b8dbe3c599e99bb5d53981c6c38fc4944e56bb92a8ead6bb989d10b7914722ae11febbd2fd0910e33b9fc4aaa77
+  languageName: node
+  linkType: hard
+
+"dom-parser@npm:^0.1.6":
+  version: 0.1.6
+  resolution: "dom-parser@npm:0.1.6"
+  checksum: 1ead37bc4bf21823649cd8a7d95e73a2fbfaf9dde838d3c666b4b6d7cc6c8b7498d41e24465b7a2d3f61b2e72304290a10c4545ddec7468b4a190cfdddc053f1
   languageName: node
   linkType: hard
 

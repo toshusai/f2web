@@ -1,6 +1,10 @@
+export type AttrValue = {
+  type: "variable" | "value";
+  value: string;
+  variants?: Record<string, AttrValue>;
+};
 
-export type AttrValue = string |
-{
-    type: "variable";
-    value: string;
+export type Variants = {
+  key: string;
+  value: string;
 };

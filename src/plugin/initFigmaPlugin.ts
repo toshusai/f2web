@@ -4,6 +4,7 @@ import {
   figmaNodeToDomNode,
 } from "./converter/figmaNodeToDomNode";
 import { domNodeToHtml } from "./converter/domNodeToHtml";
+import { DomNode } from "./converter/DomNode";
 
 /**
  * CSS Variables
@@ -190,13 +191,21 @@ async function postPreviewMessage() {
     ignoreInstance: true,
     ...parseDomName(node.name),
   };
-  const domNode = await figmaNodeToDomNode(node.children[0], ctx);
-  if (!domNode) return;
-  const html = domNodeToHtml(domNode, 0, true);
+  const domNodes = (
+    await Promise.all(
+      node.children.map((child) => figmaNodeToDomNode(child, ctx))
+    )
+  ).filter((x) => x !== null) as DomNode[];
+  if (!domNodes) return;
+  const html = domNodeToHtml(domNodes[0], 0, true);
 
   ctx.ignoreInstance = false;
-  const rawDomNode = await figmaNodeToDomNode(node.children[0], ctx);
-  if (!rawDomNode) return;
+  const rawDomNodes = (
+    await Promise.all(
+      node.children.map((child) => figmaNodeToDomNode(child, ctx))
+    )
+  ).filter((x) => x !== null) as DomNode[];
+  if (!rawDomNodes) return;
 
   const { cssVars, colors } = createCssVars();
   if (colors) {
@@ -206,7 +215,7 @@ async function postPreviewMessage() {
   figma.ui.postMessage({
     type: "selection",
     message: {
-      domNode: rawDomNode,
+      domNodes: rawDomNodes,
       html: html,
       ctx: ctx,
       cssVars,

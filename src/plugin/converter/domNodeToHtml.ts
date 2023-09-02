@@ -1,5 +1,6 @@
 import { isTextDomNode } from "./figmaNodeToDomNode";
 import { DomNode } from "./DomNode";
+import { AttrValue } from "./AttrValue";
 
 export function domNodeToHtml(
   node: DomNode,
@@ -21,10 +22,28 @@ export function domNodeToHtml(
     .map(([key, value]) => {
       if (className && key === "class") {
         if (root) {
-          return `className={props.className ?? "${value}"}`;
+          if (value.variants) {
+            return `className={props.className ?? (${variantsToTernaryOperator(
+              value.variants,
+              `"${value.value}"`
+            )})}`;
+          }
+          return `className={props.className ?? "${value.value}"}`;
         } else {
-          return `className="${value}"`;
+          if (value.variants) {
+            return `className={${variantsToTernaryOperator(
+              value.variants,
+              `"${value.value}"`
+            )}}`;
+          }
+          return `className="${value.value}"`;
         }
+      }
+      if (value.variants) {
+        return `${key}={${variantsToTernaryOperator(
+          value.variants,
+          `"${value.value}"`
+        )}}`;
       }
       if (typeof value === "string") {
         return `${key}="${value}"`;
@@ -33,18 +52,83 @@ export function domNodeToHtml(
           return `${key}="${value}"`;
         }
         return `${key}={${value.value}}`;
+      } else if (value.type === "value") {
+        return `${key}="${value.value}"`;
       }
       return "";
     })
     .join(" ")
     .replace(/ +/g, " ");
+
+  let tagJsx = "";
   if (node.children === undefined) {
-    return `${indent}<${node.type} ${attrs}></${node.type}>\n`;
+    tagJsx = `${indent}<${node.type} ${attrs}></${node.type}>\n`;
+    if (node.type === "NULL") {
+      if (ignoreInstance) {
+        tagJsx = "";
+      } else {
+        tagJsx = `null`;
+      }
+    }
+  } else {
+    const children = node.children
+      ?.map((child) =>
+        domNodeToHtml(child, depth + 1, ignoreInstance, className, false)
+      )
+      .join("");
+    tagJsx = `${indent}<${node.type} ${attrs}>\n${children}${indent}</${node.type}>\n`;
   }
-  const children = node.children
-    ?.map((child) =>
-      domNodeToHtml(child, depth + 1, ignoreInstance, className, false)
-    )
-    .join("");
-  return `${indent}<${node.type} ${attrs}>\n${children}${indent}</${node.type}>\n`;
+
+  if (node.variants) {
+    tagJsx = `${indent}{${nodeToTernalyOperator(
+      node.variants,
+      tagJsx,
+      ignoreInstance
+    ).replace(/\n/g, "")}}\n`;
+  }
+  return tagJsx;
+}
+
+function nodeToTernalyOperator(
+  variants: Record<string, DomNode>,
+  defaultValue: string,
+  ignoreInstance
+) {
+  const keys = Object.keys(variants);
+  if (keys.length === 0) {
+    return defaultValue;
+  }
+  const key = keys[0].split("=")[0];
+  const value = keys[0].split("=")[1];
+  const variantValue = variants[keys[0]];
+  return `props.${key} === "${value}" ? ${domNodeToHtml(
+    variantValue,
+    0,
+    ignoreInstance,
+    true
+  )} : ${nodeToTernalyOperator(
+    Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+    defaultValue,
+    ignoreInstance
+  )}`;
+}
+
+/**
+ * { "key=value": { type: "value", value: "valriantValue" } } => key={props.key==="value" ? "valriantValue" : "defaultValue"}
+ */
+function variantsToTernaryOperator(
+  variants: Record<string, AttrValue>,
+  defaultValue: string
+) {
+  const keys = Object.keys(variants);
+  if (keys.length === 0) {
+    return defaultValue;
+  }
+  const key = keys[0].split("=")[0];
+  const value = keys[0].split("=")[1];
+  const variantValue = variants[keys[0]].value;
+  return `props.${key} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(
+    Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+    defaultValue
+  )}`;
 }

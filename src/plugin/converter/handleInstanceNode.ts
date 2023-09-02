@@ -44,9 +44,12 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   Object.entries(node.componentProperties).forEach(([key, value]) => {
     const attrKey = convertToVariantAvairableName(key);
     if (value.type === "TEXT") {
-      attrs[attrKey] = value.value.toString();
+      attrs[attrKey] = {
+        type: "value",
+        value: value.value.toString(),
+      };
     } else if (value.type === "VARIANT") {
-      attrs[attrKey] = value.value.toString();
+      attrs[attrKey] = { value: value.value.toString(), type: "value" };
     } else if (value.type === "INSTANCE_SWAP") {
       if (typeof value.value === "boolean") {
         throw new Error("value.value is boolean");

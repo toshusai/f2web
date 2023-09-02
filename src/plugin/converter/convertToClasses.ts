@@ -299,75 +299,75 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
     }
   }
 
-  if (node.type !== "VECTOR") {
-    // background
-    // color
-    if (node.fillStyleId) {
-      if (isMixed(node.fillStyleId)) throw new Error("isMixed fillStyleId");
-      ctx.colors = ctx.colors ?? {};
-      const name = convertToCssAvairableName(node.fillStyleId);
-      ctx.colors[name] = node.fillStyleId;
-      const color = figma.getStyleById(node.fillStyleId);
-      if (!color) throw new Error("color is null");
-      if (color.type === "PAINT") {
-        const paint = color as PaintStyle;
-        const paints = paint.paints;
-        if (paints.length === 1) {
-          const paint = paints[0];
-          if (paint.type === "GRADIENT_LINEAR") {
-            classes.push(`bg-gradient-to-br`);
-            classes.push(`from-red-500`);
-            classes.push(`to-blue-500`);
+  // background
+  // color
+  if (node.fillStyleId) {
+    if (isMixed(node.fillStyleId)) throw new Error("isMixed fillStyleId");
+    ctx.colors = ctx.colors ?? {};
+    const name = convertToCssAvairableName(node.fillStyleId);
+    ctx.colors[name] = node.fillStyleId;
+    const color = figma.getStyleById(node.fillStyleId);
+    if (!color) throw new Error("color is null");
+    if (color.type === "PAINT") {
+      const paint = color as PaintStyle;
+      const paints = paint.paints;
+      if (paints.length === 1) {
+        const paint = paints[0];
+        if (paint.type === "GRADIENT_LINEAR") {
+          classes.push(`bg-gradient-to-br`);
+          classes.push(`from-red-500`);
+          classes.push(`to-blue-500`);
+        } else {
+          classes.push(`bg-${name}`);
+        }
+      }
+    }
+  } else {
+    if (isMixed(node.fills)) {
+      // throw new Error("isMixed fills");
+    }
+    if (!isMixed(node.fills) && node.fills.length === 1) {
+      const fill = node.fills[0];
+      if (fill.type === "SOLID") {
+        if (fill.boundVariables?.color) {
+          const id = fill.boundVariables.color.id;
+          const color = figma.variables.getVariableById(id);
+          if (!id) throw new Error("id is null");
+          if (!color) throw new Error("color is null");
+          const name = convertToCssAvairableName(color.id);
+          if (!ctx.colors) ctx.colors = {};
+          if (color?.resolvedType === "COLOR") {
+            ctx.colors[name] = color.id;
+          }
+          if (node.type === "TEXT" || node.type === "VECTOR") {
+            classes.push(`text-${name}`);
           } else {
             classes.push(`bg-${name}`);
           }
-        }
-      }
-    } else {
-      if (isMixed(node.fills)) throw new Error("isMixed fills");
-      if (node.fills.length === 1) {
-        const fill = node.fills[0];
-        if (fill.type === "SOLID") {
-          if (fill.boundVariables?.color) {
-            const id = fill.boundVariables.color.id;
-            const color = figma.variables.getVariableById(id);
-            if (!id) throw new Error("id is null");
-            if (!color) throw new Error("color is null");
-            const name = convertToCssAvairableName(color.id);
-            if (!ctx.colors) ctx.colors = {};
-            if (color?.resolvedType === "COLOR") {
-              ctx.colors[name] = color.id;
-            }
-            if (node.type === "TEXT") {
-              classes.push(`text-${name}`);
-            } else {
-              classes.push(`bg-${name}`);
-            }
+        } else {
+          const hex = colorToHex(fill.color, fill.opacity ?? 1);
+          if (node.type === "TEXT" || node.type === "VECTOR") {
+            classes.push(`text-[${hex}]`);
           } else {
-            const hex = colorToHex(fill.color, fill.opacity ?? 1);
-            if (node.type === "TEXT") {
-              classes.push(`text-[${hex}]`);
-            } else {
-              classes.push(`bg-[${hex}]`);
-            }
+            classes.push(`bg-[${hex}]`);
           }
-        } else if (fill.type === "IMAGE") {
-          if (fill.imageHash) {
-            const res = await figma
-              .getImageByHash(fill.imageHash)
-              ?.getBytesAsync();
-            ctx.images = ctx.images ?? {};
-            if (res) {
-              ctx.images[fill.imageHash] = res;
-            }
-            ctx.props = ctx.props ?? {};
-            ctx.props[fill.imageHash] = {
-              type: "string",
-              defaultValue: `https://picsum.photos/seed/${fill.imageHash}/200/300`,
-            };
+        }
+      } else if (fill.type === "IMAGE") {
+        if (fill.imageHash) {
+          const res = await figma
+            .getImageByHash(fill.imageHash)
+            ?.getBytesAsync();
+          ctx.images = ctx.images ?? {};
+          if (res) {
+            ctx.images[fill.imageHash] = res;
+          }
+          ctx.props = ctx.props ?? {};
+          ctx.props[fill.imageHash] = {
+            type: "string",
+            defaultValue: `https://picsum.photos/seed/${fill.imageHash}/200/300`,
+          };
 
-            classes.push(`img=${fill.imageHash}`);
-          }
+          classes.push(`img=${fill.imageHash}`);
         }
       }
     }
