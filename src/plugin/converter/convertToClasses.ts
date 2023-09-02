@@ -75,7 +75,8 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
 
     if (node.fontName) {
       if (isMixed(node.fontName)) throw new Error("isMixed");
-      classes.push(`font-${node.fontName.family}`);
+      // TODO implement
+      // classes.push(`font-${node.fontName.family}`);
     }
   } else {
     // position
@@ -126,6 +127,9 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
       if (node.layoutWrap === "WRAP" && node.layoutMode === "HORIZONTAL") {
         classes.push("flex-wrap");
         classes.push("[&>*]:flex-1");
+        // should use grid ?
+        // display: grid;
+        // grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
       }
 
       if (node.primaryAxisAlignItems === "MIN") {
@@ -370,6 +374,54 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
           classes.push(`img=${fill.imageHash}`);
         }
       }
+    }
+  }
+
+  return optimizeClasses(classes);
+}
+
+export function optimizeClasses(classes: string[]) {
+  const paddinX = classes
+    .filter((c) => c.startsWith("pl-") || c.startsWith("pr-"))
+    .map((c) => c.split("-")[1]);
+  if (paddinX.length === 2 && paddinX[0] === paddinX[1]) {
+    classes = classes.filter(
+      (c) => !c.startsWith("pl-") && !c.startsWith("pr-")
+    );
+    classes.push(`px-${paddinX[0]}`);
+  }
+
+  const paddinY = classes
+    .filter((c) => c.startsWith("pt-") || c.startsWith("pb-"))
+    .map((c) => c.split("-")[1]);
+  if (paddinY.length === 2 && paddinY[0] === paddinY[1]) {
+    classes = classes.filter(
+      (c) => !c.startsWith("pt-") && !c.startsWith("pb-")
+    );
+    classes.push(`py-${paddinY[0]}`);
+  }
+
+  const paddingAll = classes
+    .filter((c) => c.startsWith("px-") || c.startsWith("py-"))
+    .map((c) => c.split("-")[1]);
+  if (paddingAll.length === 2 && paddingAll[0] === paddingAll[1]) {
+    classes = classes.filter(
+      (c) => !c.startsWith("px-") && !c.startsWith("py-")
+    );
+    classes.push(`p-${paddingAll[0]}`);
+  }
+
+  const borderRadiusAll = classes
+    .filter((c) => c.startsWith("rounded-"))
+    .map((c) => {
+      const splited = c.split("-");
+      return splited[splited.length - 1];
+    });
+  if (borderRadiusAll.length === 5) {
+    const [a, tl, tr, br, bl] = borderRadiusAll;
+    if (a === tl && tl === tr && tr === br && br === bl) {
+      classes = classes.filter((c) => !c.startsWith("rounded-"));
+      classes.push(`rounded-${a}`);
     }
   }
 

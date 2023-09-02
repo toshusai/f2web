@@ -72,7 +72,7 @@ export async function figmaNodeToDomNode(
         };
         ctx.props = ctx.props ?? {};
         ctx.props[convertToVariantAvairableName(attr)] = {
-          type: "?() => void",
+          type: `?JSX.IntrinsicElements["${ctx.meta!.tagName}"]["${attr}"]`,
           defaultValue: "",
         };
       });
@@ -84,7 +84,7 @@ export async function figmaNodeToDomNode(
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};
       ctx.props[convertToVariantAvairableName(attr)] = {
-        type: "?() => void",
+        type: `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr}"]`,
         defaultValue: "",
       };
     });

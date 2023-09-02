@@ -8,7 +8,7 @@ export function getReactSrc(node: DomNode, ctx: any) {
   return `import React from "react";
 ${Object.keys(ctx.dependencies ?? {})
   .map((key) => {
-    return `import { ${key} } from "./${key}";\n`;
+    return `import { ${key} } from "../${key}";\n`;
   })
   .join("")}
 export function ${ctx.name}(${contextPropsToReactPropsString({

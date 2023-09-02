@@ -49,7 +49,15 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
         value: value.value.toString(),
       };
     } else if (value.type === "VARIANT") {
-      attrs[attrKey] = { value: value.value.toString(), type: "value" };
+      const componentSet = node.mainComponent?.parent as
+        | ComponentSetNode
+        | undefined;
+      if (!componentSet) throw new Error("componentSet is null");
+      const variant =
+        componentSet.variantGroupProperties[value.value.toString()];
+      if (variant && variant.values.length > 1) {
+        attrs[attrKey] = { value: value.value.toString(), type: "value" };
+      }
     } else if (value.type === "INSTANCE_SWAP") {
       if (typeof value.value === "boolean") {
         throw new Error("value.value is boolean");

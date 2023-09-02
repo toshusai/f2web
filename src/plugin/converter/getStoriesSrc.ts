@@ -5,7 +5,7 @@ export function getStoriesSrc(ctx: Context) {
   const name = ctx.name;
   return `import type { Meta, StoryObj } from "@storybook/react";
 
-import { ${name} } from "./${name}";
+import { ${name} } from ".";
 
 const meta = {
   component: ${name},
