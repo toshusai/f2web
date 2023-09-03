@@ -32,15 +32,6 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   ctx.dependencies[tag] = "INSTANCE";
 
   const attrs: Record<string, AttrValue> = {};
-  const domName = parseDomName(node.name);
-  if (domName.meta.attributes.length > 0) {
-    domName.meta.attributes.forEach((attr) => {
-      attrs[attr] = {
-        type: "variable",
-        value: `props.${convertToVariantAvairableName(attr)}`,
-      };
-    });
-  }
   Object.entries(node.componentProperties).forEach(([key, value]) => {
     const attrKey = convertToVariantAvairableName(key);
     if (value.type === "TEXT") {
@@ -53,8 +44,7 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
         | ComponentSetNode
         | undefined;
       if (!componentSet) throw new Error("componentSet is null");
-      const variant =
-        componentSet.variantGroupProperties[value.value.toString()];
+      const variant = componentSet.variantGroupProperties[attrKey];
       if (variant && variant.values.length > 1) {
         attrs[attrKey] = { value: value.value.toString(), type: "value" };
       }
@@ -67,10 +57,16 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
       const name = component.parent?.name;
       if (!name) throw new Error("name is null");
 
+      const componentSet = component.parent as ComponentSetNode | undefined;
+      if (!componentSet) throw new Error("componentSet is null");
+
       const nameToTag = component.name
         .split(",")
         .map((x) => {
           const sp = x.split("=");
+          const variant = componentSet.variantGroupProperties[sp[0]];
+          if (!variant) return "";
+          if (variant.values.length <= 1) return "";
           return `${convertToVariantAvairableName(sp[0])}="${sp[1]}"`;
         })
         .join(" ");
@@ -83,6 +79,17 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
       };
     }
   });
+  const domName = parseDomName(node.name);
+  if (domName.meta.attributes.length > 0) {
+    console.warn(domName.meta.attributes);
+    domName.meta.attributes.forEach((attr) => {
+      attrs[attr] = {
+        type: "variable",
+        value: `props.${convertToVariantAvairableName(attr)}`,
+      };
+    });
+  }
+
   return {
     type: tag,
     attrs: attrs,

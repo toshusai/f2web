@@ -84,7 +84,10 @@ export async function figmaNodeToDomNode(
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};
       ctx.props[convertToVariantAvairableName(attr)] = {
-        type: `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr}"]`,
+        type:
+          node.type === "INSTANCE"
+            ? `React.ComponentProps<typeof ${domName.name}>["${attr}"]`
+            : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr}"]`,
         defaultValue: "",
       };
     });

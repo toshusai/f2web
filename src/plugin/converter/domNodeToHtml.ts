@@ -67,7 +67,7 @@ export function domNodeToHtml(
       if (ignoreInstance) {
         tagJsx = "";
       } else {
-        tagJsx = `null`;
+        tagJsx = `<></>`;
       }
     }
   } else {
