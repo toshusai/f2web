@@ -7,6 +7,7 @@ export function getReactSrc(node: DomNode, ctx: any) {
 
   return `import React from "react";
 ${Object.keys(ctx.dependencies ?? {})
+  .filter((key) => jsx.includes(`<${key}`))
   .map((key) => {
     return `import { ${key} } from "../${key}";\n`;
   })

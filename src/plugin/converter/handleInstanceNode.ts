@@ -72,10 +72,10 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
         .join(" ");
 
       ctx.dependencies = ctx.dependencies ?? {};
-      ctx.dependencies[convertToVariantAvairableName(name)] = "INSTANCE";
+      ctx.dependencies[name] = "INSTANCE";
       attrs[attrKey] = {
         type: "variable",
-        value: `<${convertToVariantAvairableName(name)} ${nameToTag} />`,
+        value: `<${name} ${nameToTag} />`,
       };
     }
   });

@@ -1,6 +1,10 @@
-import { isTextDomNode } from "./figmaNodeToDomNode";
+import {
+  convertToVariantAvairableName,
+  isTextDomNode,
+} from "./figmaNodeToDomNode";
 import { DomNode } from "./DomNode";
 import { AttrValue } from "./AttrValue";
+import { toCamelCase } from "js-convert-case";
 
 export function domNodeToHtml(
   node: DomNode,
@@ -20,6 +24,9 @@ export function domNodeToHtml(
 
   const attrs = Object.entries(node.attrs ?? {})
     .map(([key, value]) => {
+      if (className) {
+        key = toCamelCase(key);
+      }
       if (className && key === "class") {
         if (root) {
           if (value.variants) {
@@ -101,7 +108,9 @@ function nodeToTernalyOperator(
   const key = keys[0].split("=")[0];
   const value = keys[0].split("=")[1];
   const variantValue = variants[keys[0]];
-  return `props.${key} === "${value}" ? ${domNodeToHtml(
+  return `props.${convertToVariantAvairableName(
+    key
+  )} === "${value}" ? ${domNodeToHtml(
     variantValue,
     0,
     ignoreInstance,
@@ -127,7 +136,9 @@ function variantsToTernaryOperator(
   const key = keys[0].split("=")[0];
   const value = keys[0].split("=")[1];
   const variantValue = variants[keys[0]].value;
-  return `props.${key} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(
+  return `props.${convertToVariantAvairableName(
+    key
+  )} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(
     Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
     defaultValue
   )}`;

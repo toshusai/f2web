@@ -6,6 +6,7 @@ import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
 import { convertToClasses } from "./convertToClasses";
 import { DomMeta, parseDomName } from "../initFigmaPlugin";
+import { toCamelCase } from "js-convert-case";
 var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
@@ -90,6 +91,10 @@ export async function figmaNodeToDomNode(
             : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr}"]`,
         defaultValue: "",
       };
+      attrs[attr] = {
+        type: "variable",
+        value: `props.${convertToVariantAvairableName(attr)}`,
+      };
     });
   }
 
@@ -147,23 +152,6 @@ export async function figmaNodeToDomNode(
     return svgNode;
   }
   if (node.type === "FRAME" || node.type === "COMPONENT" || ignoreInstance) {
-    const img = classes.find((c) => c.startsWith("img="));
-    if (img) {
-      return {
-        type: "img",
-        attrs: {
-          src: {
-            type: "variable",
-            value: `props.${img.replace("img=", "")}`,
-          },
-          class: {
-            type: "value",
-            value: classes.join(" "),
-          },
-          ...attrs,
-        },
-      };
-    }
     ctx.depth++;
     const childrenPromises = node.children.map(
       async (child) => await figmaNodeToDomNode(child, ctx)
@@ -173,10 +161,12 @@ export async function figmaNodeToDomNode(
     ) as DomNode[];
     ctx.depth--;
     const joinedClasses = classes.join(" ");
-    const name =
-      node.parent?.type === "COMPONENT_SET"
-        ? ctx.meta?.tagName ?? parseDomName(node.name).name
-        : "div";
+    let name = "div";
+    if (node.parent?.type === "COMPONENT_SET") {
+      name = ctx.meta?.tagName ?? "div";
+    } else {
+      name = parseDomName(node.name).meta.tagName ?? "div";
+    }
     return {
       type: name,
       name: node.name,
@@ -260,7 +250,7 @@ export async function figmaNodeToDomNode(
 }
 
 export function convertToVariantAvairableName(name: string) {
-  return name.replace(/[ #:]/g, "");
+  return toCamelCase(name.split("#")[0].replace(/[ #:]/g, ""));
 }
 
 export function isTextDomNode(node: DomNode): node is TextDomNode {

@@ -366,12 +366,7 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
             ctx.images[fill.imageHash] = res;
           }
           ctx.props = ctx.props ?? {};
-          ctx.props[fill.imageHash] = {
-            type: "string",
-            defaultValue: `https://picsum.photos/seed/${fill.imageHash}/200/300`,
-          };
-
-          classes.push(`img=${fill.imageHash}`);
+          //`https://picsum.photos/seed/${fill.imageHash}/200/300`,
         }
       }
     }
