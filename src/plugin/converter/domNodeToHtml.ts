@@ -38,16 +38,6 @@ export function domNodeToHtml(
           return `className={props.className ?? "${value.value}"}`;
         } else {
           if (value.variants) {
-            const newValue = nodeToMediaQeurys(
-              value.variants,
-              value.value,
-              ignoreInstance
-            );
-            if (newValue.length !== 0) {
-              value.value = newValue.join(" ");
-              return `className="${newValue.join(" ")}"`;
-            }
-
             return `className={${variantsToTernaryOperator(
               value.variants,
               `"${value.value}"`
@@ -185,15 +175,41 @@ function nodeToTernalyOperator(
  */
 function variantsToTernaryOperator(
   variants: Record<string, AttrValue>,
-  defaultValue: string
+  defaultValue: string,
+  mediaMode: boolean = false
 ) {
   const keys = Object.keys(variants);
   if (keys.length === 0) {
+    if (mediaMode) return "";
     return defaultValue;
   }
   const key = keys[0].split("=")[0];
   const value = keys[0].split("=")[1];
   const variantValue = variants[keys[0]].value;
+
+  let final = defaultValue.replace(/"/g, "").split(" ");
+  if (key.startsWith("@")) {
+    const variantClasses = variantValue.split(" ");
+
+    const plusDiff = variantClasses.filter((x) => !final.includes(x));
+    const minusDiff = final.filter((x) => !variantClasses.includes(x));
+    minusDiff.forEach((x) => {
+      if (x === "hidden") {
+        final.push(`${value}:flex`);
+      }
+    });
+
+    final = [
+      ...final,
+      ...variantsToTernaryOperator(
+        Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+        defaultValue.replace(/"/g, ""),
+        true
+      ).split(" "),
+    ];
+
+    return `"${final.join(" ")}"`;
+  }
   return `props.${convertToVariantAvairableName(
     key
   )} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(
