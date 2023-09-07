@@ -81,7 +81,6 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
   });
   const domName = parseDomName(node.name);
   if (domName.meta.attributes.length > 0) {
-    console.warn(domName.meta.attributes);
     domName.meta.attributes.forEach((attr) => {
       attrs[attr] = {
         type: "variable",

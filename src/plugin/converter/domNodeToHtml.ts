@@ -3,7 +3,7 @@ import {
   isTextDomNode,
 } from "./figmaNodeToDomNode";
 import { DomNode } from "./DomNode";
-import { AttrValue } from "./AttrValue";
+import { AttrValue, Variants } from "./AttrValue";
 import { toCamelCase } from "js-convert-case";
 
 export function domNodeToHtml(
@@ -38,6 +38,16 @@ export function domNodeToHtml(
           return `className={props.className ?? "${value.value}"}`;
         } else {
           if (value.variants) {
+            const newValue = nodeToMediaQeurys(
+              value.variants,
+              value.value,
+              ignoreInstance
+            );
+            if (newValue.length !== 0) {
+              value.value = newValue.join(" ");
+              return `className="${newValue.join(" ")}"`;
+            }
+
             return `className={${variantsToTernaryOperator(
               value.variants,
               `"${value.value}"`
@@ -96,6 +106,51 @@ export function domNodeToHtml(
   return tagJsx;
 }
 
+function nodeToMediaQeurys(
+  variants: Record<string, AttrValue>,
+  defaultValue: string,
+  ignoreInstance
+) {
+  const keys = Object.keys(variants);
+  if (keys.length === 0) {
+    return [];
+  }
+  const key = keys[0].split("=")[0];
+  const value = keys[0].split("=")[1];
+  const variantValue = variants[keys[0]];
+  let final = defaultValue.split(" ");
+  if (key.startsWith("@")) {
+    const variantClasses = variantValue.value.split(" ");
+
+    const plusDiff = variantClasses.filter((x) => !final.includes(x));
+    const minusDiff = final.filter((x) => !variantClasses.includes(x));
+    minusDiff.forEach((x) => {
+      if (x === "hidden") {
+        final.push(`${value}:flex`);
+      }
+    });
+
+    final = final;
+  }
+  final = [
+    ...final,
+    ...nodeToMediaQeurys(
+      Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+      defaultValue,
+      ignoreInstance
+    ),
+  ];
+  return final;
+}
+
+function getClasses(node: DomNode) {
+  if (isTextDomNode(node)) return [];
+  if (!node.attrs) return [];
+  const classes = node.attrs["class"];
+  if (!classes) return [];
+  return classes.value.split(" ");
+}
+
 function nodeToTernalyOperator(
   variants: Record<string, DomNode>,
   defaultValue: string,
@@ -106,6 +161,9 @@ function nodeToTernalyOperator(
     return defaultValue;
   }
   const key = keys[0].split("=")[0];
+  if (key.startsWith("@")) {
+    return defaultValue;
+  }
   const value = keys[0].split("=")[1];
   const variantValue = variants[keys[0]];
   return `props.${convertToVariantAvairableName(

@@ -12,16 +12,22 @@ app.use((_, res, next) => {
   next();
 });
 
+const DIR = "";
+
 app.post("/api/v1/create", (req, res) => {
   const src = req.body.src;
   const name = req.body.name;
   const stories = req.body.stories;
   const colorsCss = req.body.colorsCss;
   const tailwindColors = req.body.tailwindColors;
-  fs.writeFileSync(`./src/stories/${name}.tsx`, src);
-  fs.writeFileSync(`./src/stories/${name}.stories.tsx`, stories);
-  fs.writeFileSync(`./.storybook/colors.css`, colorsCss);
-  fs.writeFileSync(`./colors.js`, tailwindColors);
+  fs.mkdirSync(`${DIR}/components/react/${name}`, { recursive: true });
+  fs.writeFileSync(`${DIR}/components/react/${name}/index.tsx`, src);
+  fs.writeFileSync(
+    `${DIR}/components/react/${name}/index.stories.tsx`,
+    stories
+  );
+  fs.writeFileSync(`${DIR}/global.css`, colorsCss);
+  fs.writeFileSync(`${DIR}/colors.js`, tailwindColors);
   res.send({
     status: "ok",
   });

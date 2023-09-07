@@ -25,6 +25,7 @@ export function convertToCssAvairableName(name: string) {
 
 export type Context = {
   root: ComponentSetNode;
+  storyLayout: "centered" | "fullscreen" | "padded";
   ignoreInstance: boolean;
   name: string;
   props?: Props;
@@ -60,10 +61,14 @@ export async function figmaNodeToDomNode(
       value: string;
     }
   > = {};
+  const classes = await convertToClasses(node, ctx);
   if (node.parent?.type === "COMPONENT_SET") {
     ctx.props = {
       ...variantToProps(node.parent),
     };
+    if (classes.includes("w-full")) {
+      // ctx.storyLayout = "fullscreen";
+    }
 
     if (ctx.meta) {
       ctx.meta.attributes.forEach((attr) => {
@@ -100,19 +105,8 @@ export async function figmaNodeToDomNode(
 
   if (!supportedNodes(node)) return null;
   if (!node.visible) {
-    return {
-      type: "NULL", //ctx.meta?.tagName ?? "div",
-      attrs: {
-        class: {
-          type: "value",
-          value: "hidden",
-        },
-      },
-    };
+    classes.push("hidden");
   }
-  ctx.depth++;
-  const classes = await convertToClasses(node, ctx);
-  ctx.depth--;
   const ignoreInstance =
     node.type === "INSTANCE" && ctx.ignoreInstance === true;
   if (node.type === "VECTOR") {

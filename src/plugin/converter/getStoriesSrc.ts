@@ -1,6 +1,5 @@
 import { Context } from "./figmaNodeToDomNode";
 
-
 export function getStoriesSrc(ctx: Context) {
   const name = ctx.name;
   return `import type { Meta, StoryObj } from "@storybook/react";
@@ -10,7 +9,7 @@ import { ${name} } from ".";
 const meta = {
   component: ${name},
   parameters: {
-    layout: "centered",
+    layout: "${ctx.storyLayout ?? "centered"}",
   },
 } satisfies Meta<typeof ${name}>;
 
@@ -25,7 +24,7 @@ export const Basic: Story = {
         if (ctx.props[key].type === "string") {
           return `${key}: "${ctx.props[key].defaultValue}"`;
         } else if (ctx.props[key].type === "INSTANCE") {
-          return `${key}: "${ctx.props[key].defaultValue}"`;
+          return `${key}: <div className="rounded-[4px] bg-gradient-to-br from-red-500 to-blue-500 p-[8px] text-white">props.${key}</div>`;
         } else if (Array.isArray(ctx.props[key].type)) {
           const defaultValue = ctx.props[key].defaultValue;
           if (!defaultValue) return "";
