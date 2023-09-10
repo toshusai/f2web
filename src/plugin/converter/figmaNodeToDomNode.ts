@@ -42,7 +42,7 @@ export async function figmaNodeToDomNode(
             propName: attr.key,
             optional: true,
           },
-          defaultValue: `${attr.key}`,
+          defaultValue: `"${attr.key}"`,
         };
       });
     }
@@ -52,7 +52,9 @@ export async function figmaNodeToDomNode(
   if (domName.meta.attributes.length > 0) {
     let name = domName.name;
     if (node.type === "INSTANCE") {
-      name = node.mainComponent?.parent?.name ?? domName.name;
+      name =
+        parseDomName(node.mainComponent?.parent?.name ?? "").name ??
+        domName.name;
     }
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};

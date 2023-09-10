@@ -27,6 +27,7 @@ export function handleInstanceNode(
         };
         return {
           type: "text",
+          valueType: "variable",
           value: convertToVariantAvairableName(key),
         };
       }
