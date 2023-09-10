@@ -3,7 +3,7 @@ import {
   convertToVariantAvairableName,
   isTextDomNode,
 } from "./figmaNodeToDomNode";
-import { AttrValue } from "./AttrValue";
+import { AttrType, AttrValue } from "./AttrValue";
 import { DomNode } from "./DomNode";
 import { parseDomName } from "../parseDomName";
 function findComponentPropertyReferences(
@@ -35,12 +35,14 @@ export function handleInstanceNode(
       if (node.componentPropertyReferences.mainComponent === key) {
         ctx.props = ctx.props ?? {};
         ctx.props[convertToVariantAvairableName(key)] = {
-          type: "INSTANCE",
+          type: {
+            type: "INSTANCE",
+          },
           defaultValue: node.mainComponent.id,
         };
         return {
           type: "text",
-          value: `{props.${convertToVariantAvairableName(key)}}`,
+          value: convertToVariantAvairableName(key),
         };
       }
     }
@@ -56,11 +58,10 @@ export function handleInstanceNode(
 
   const attrs: Record<string, AttrValue> = {};
   Object.entries(node.componentProperties).forEach(([key, value]) => {
-    console.log(node.name, key, value);
     const attrKey = convertToVariantAvairableName(key);
     if (value.type === "TEXT") {
       attrs[attrKey] = {
-        type: "value",
+        type: AttrType.VALUE,
         value: value.value.toString(),
       };
     } else if (value.type === "VARIANT") {
@@ -70,7 +71,10 @@ export function handleInstanceNode(
       if (!componentSet) throw new Error("componentSet is null");
       const variant = componentSet.variantGroupProperties[key];
       if (variant && variant.values.length > 1) {
-        attrs[attrKey] = { value: value.value.toString(), type: "value" };
+        attrs[attrKey] = {
+          value: value.value.toString(),
+          type: AttrType.VALUE,
+        };
       }
     } else if (value.type === "INSTANCE_SWAP") {
       if (typeof value.value === "boolean") {
@@ -112,7 +116,7 @@ export function handleInstanceNode(
           throw new Error("z is text");
         }
         attrs[convertToVariantAvairableName(key)] = {
-          type: "variable",
+          type: AttrType.VARIABLE,
           value: `<${z.type} ${Object.entries(z.attrs ?? {})
             .map(([key, value]) => {
               if (value.type === "variable") {
@@ -155,8 +159,8 @@ export function handleInstanceNode(
   if (domName.meta.attributes.length > 0) {
     domName.meta.attributes.forEach((attr) => {
       attrs[attr.key] = {
-        type: "variable",
-        value: `props.${convertToVariantAvairableName(attr.value)}`,
+        type: AttrType.VARIABLE,
+        value: convertToVariantAvairableName(attr.value),
       };
     });
   }

@@ -1,8 +1,9 @@
 import { domNodeToHtml } from "./domNodeToHtml";
 import { DomNode } from "./DomNode";
 import { contextPropsToReactPropsString } from "./contextPropsToReactPropsString";
+import { Context } from "./figmaNodeToDomNode";
 
-export function getReactSrc(node: DomNode, ctx: any) {
+export function getReactSrc(node: DomNode, ctx: Context) {
   const jsx = domNodeToHtml(node, 2, false, true);
 
   return `import React from "react";
@@ -14,7 +15,14 @@ ${Object.keys(ctx.dependencies ?? {})
   .join("")}
 export function ${ctx.name}(${contextPropsToReactPropsString({
     ...ctx.props,
-    className: { type: "?string", defaultValue: '""' },
+    className: {
+      type: {
+        type: "native",
+        value: "string",
+        optional: true,
+      },
+      defaultValue: '""',
+    },
   })}) {
   return (
 ${jsx}  )

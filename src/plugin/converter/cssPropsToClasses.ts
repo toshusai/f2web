@@ -1,11 +1,14 @@
 import { optimizeClasses } from "./optimizeClasses";
 import { Properties } from "./Properties";
 
-
 export function cssPropsToClasses(props: Partial<Properties>) {
   const classes: string[] = [];
   if (props.color) {
-    classes.push(`text-${props.color}`);
+    if (props.color.startsWith("#")) {
+      classes.push(`text-[${props.color}]`);
+    } else {
+      classes.push(`text-${props.color}`);
+    }
   }
   if (props.backgroundColor) {
     if (props.backgroundColor.startsWith("linear-gradient")) {
@@ -13,7 +16,11 @@ export function cssPropsToClasses(props: Partial<Properties>) {
       classes.push(`from-red-500`);
       classes.push(`to-blue-500`);
     } else {
-      classes.push(`bg-${props.backgroundColor}`);
+      if (props.backgroundColor.startsWith("#")) {
+        classes.push(`bg-[${props.backgroundColor}]`);
+      } else {
+        classes.push(`bg-${props.backgroundColor}`);
+      }
     }
   }
   if (props.paddingBottom) {
@@ -116,7 +123,6 @@ export function cssPropsToClasses(props: Partial<Properties>) {
       const [x, y, blur, spread, color] = split;
       classes.push(`shadow-[${x}_${y}_${blur}_${spread}_${color}]`);
     }
-    console.log(split);
   }
   if (props.fontSize) {
     classes.push(`text-[${props.fontSize}px]`);

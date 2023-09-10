@@ -47,13 +47,42 @@ export type Context = {
 };
 export type Props = {
   [key: string]: {
-    type: string | "INSTANCE" | string[];
+    type: PropType;
     defaultValue?: string;
   };
 };
 
+export type PropType = TypeOf | Union | Instance | Native;
+
+type TypeOf = {
+  type: "typeof";
+  typeName: string;
+  propName: string;
+  optional?: boolean;
+};
+
+type Union = {
+  type: "union";
+  types: string[];
+};
+
+type Instance = {
+  type: "INSTANCE";
+};
+
+type Native = {
+  type: "native";
+  value: "string";
+  optional?: boolean;
+};
+
 export function stylesToClassAttrsRecursive(domNode: DomNode) {
-  if (isTextDomNode(domNode)) return;
+  if (isTextDomNode(domNode)) {
+    if (domNode.valueType === "variable") {
+      domNode.value = `{props.${domNode.value}}`;
+    }
+    return;
+  }
   if (domNode.styles) {
     if (!domNode.attrs) {
       domNode.attrs = {};
@@ -62,6 +91,12 @@ export function stylesToClassAttrsRecursive(domNode: DomNode) {
       type: AttrType.VALUE,
       value: cssPropsToClasses(domNode.styles).join(" "),
     };
+    Object.keys(domNode.attrs).forEach((key) => {
+      domNode.attrs = domNode.attrs ?? {};
+      if (domNode.attrs[key].type === AttrType.VARIABLE) {
+        domNode.attrs[key].value = `props.${domNode.attrs[key].value}`;
+      }
+    });
   }
   if (domNode.children) {
     domNode.children.forEach((child) => stylesToClassAttrsRecursive(child));
@@ -86,11 +121,17 @@ export async function figmaNodeToDomNode(
       ctx.meta.attributes.forEach((attr) => {
         attrs[attr.key] = {
           type: AttrType.VARIABLE,
-          value: `props.${convertToVariantAvairableName(attr.value)}`,
+          value: convertToVariantAvairableName(attr.value),
         };
         ctx.props = ctx.props ?? {};
         ctx.props[convertToVariantAvairableName(attr.value)] = {
-          type: `?JSX.IntrinsicElements["${ctx.meta!.tagName}"]["${attr.key}"]`,
+          // type: `?JSX.IntrinsicElements["${ctx.meta!.tagName}"]["${attr.key}"]`,
+          type: {
+            type: "typeof",
+            typeName: ctx.meta!.tagName,
+            propName: attr.key,
+            optional: true,
+          },
           defaultValue: `${attr.key}`,
         };
       });
@@ -102,15 +143,22 @@ export async function figmaNodeToDomNode(
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};
       ctx.props[convertToVariantAvairableName(attr.value)] = {
-        type:
-          node.type === "INSTANCE"
-            ? `React.ComponentProps<typeof ${domName.name}>["${attr.key}"]`
-            : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr.key}"]`,
+        // type:
+        //   node.type === "INSTANCE"
+        //     ? `React.ComponentProps<typeof ${domName.name}>["${attr.key}"]`
+        //     : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr.key}"]`,
+        type: {
+          type: "typeof",
+          typeName:
+            node.type === "INSTANCE" ? domName.name : domName.meta.tagName,
+          propName: attr.key,
+          optional: node.type !== "INSTANCE",
+        },
         defaultValue: `${attr.key}`,
       };
       attrs[attr.key] = {
         type: AttrType.VARIABLE,
-        value: `props.${convertToVariantAvairableName(attr.value)}`,
+        value: convertToVariantAvairableName(attr.value),
       };
     });
   }
@@ -181,7 +229,10 @@ export function handleTextNode(node: TextNode, ctx: Context): DomNode {
       if (node.componentPropertyReferences.characters === key) {
         ctx.props = ctx.props ?? {};
         ctx.props[convertToVariantAvairableName(key)] = {
-          type: "string",
+          type: {
+            type: "native",
+            value: "string",
+          },
           defaultValue: node.characters,
         };
         return {
@@ -190,7 +241,7 @@ export function handleTextNode(node: TextNode, ctx: Context): DomNode {
           children: [
             {
               type: "text",
-              value: `{props.${convertToVariantAvairableName(key)}}`,
+              value: convertToVariantAvairableName(key),
               valueType: "variable",
             },
           ],

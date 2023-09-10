@@ -1,6 +1,7 @@
+import { Props } from "./figmaNodeToDomNode";
 import { type2TypeScriptType } from "./type2TypeScriptType";
 
-export function contextPropsToReactPropsString(props: any) {
+export function contextPropsToReactPropsString(props: Props) {
   if (!props) return "";
   const keys = Object.keys(props);
   const indent = "  ".repeat(1);
