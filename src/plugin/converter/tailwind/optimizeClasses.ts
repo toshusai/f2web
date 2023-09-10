@@ -1,4 +1,3 @@
-
 export function optimizeClasses(classes: string[]) {
   const paddinX = classes
     .filter((c) => c.startsWith("pl-") || c.startsWith("pr-"))

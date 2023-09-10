@@ -4,8 +4,8 @@ import "highlight.js/styles/vs2015.css";
 import hljs from "highlight.js";
 import typescript from "highlight.js/lib/languages/typescript";
 import { addMessageEventListener } from "../addMessageEventListener";
-import { getReactSrc } from "../../plugin/converter/getReactSrc";
-import { getStoriesSrc } from "../../plugin/converter/getStoriesSrc";
+import { getReactSrc } from "../../plugin/converter/react/getReactSrc";
+import { getStoriesSrc } from "../../plugin/converter/react/getStoriesSrc";
 import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
 import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
 

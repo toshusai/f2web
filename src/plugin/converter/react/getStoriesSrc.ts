@@ -1,4 +1,4 @@
-import { Context } from "./figmaNodeToDomNode";
+import { Context } from "../figmaNodeToDomNode";
 
 export function getStoriesSrc(ctx: Context) {
   const name = ctx.name;
@@ -21,11 +21,11 @@ export const Basic: Story = {
     ${Object.keys(ctx.props ?? {})
       .map((key) => {
         if (!ctx.props) return "";
-        if (ctx.props[key].type === "string") {
+        if (ctx.props[key].type.type === "native") {
           return `${key}: "${ctx.props[key].defaultValue}"`;
-        } else if (ctx.props[key].type === "INSTANCE") {
+        } else if (ctx.props[key].type.type === "INSTANCE") {
           return `${key}: <div className="rounded-[4px] bg-gradient-to-br from-red-500 to-blue-500 p-[8px] text-white">props.${key}</div>`;
-        } else if (Array.isArray(ctx.props[key].type)) {
+        } else if (ctx.props[key].type.type === "union") {
           const defaultValue = ctx.props[key].defaultValue;
           if (!defaultValue) return "";
           return `${key}: ${defaultValue}`;

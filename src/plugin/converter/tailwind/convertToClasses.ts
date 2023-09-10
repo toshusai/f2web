@@ -1,10 +1,10 @@
-import { colorToHex } from "../colorToHex";
-import { supportedNodes } from "./supportedNodes";
+import { colorToHex } from "../../colorToHex";
+import { supportedNodes } from "../supportedNodes";
 import {
   Context,
   isMixed,
   convertToCssAvairableName,
-} from "./figmaNodeToDomNode";
+} from "../figmaNodeToDomNode";
 import { optimizeClasses } from "./optimizeClasses";
 
 export async function convertToClasses(node: SceneNode, ctx: Context) {

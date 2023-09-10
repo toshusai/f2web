@@ -1,5 +1,5 @@
+import { Properties } from "../Properties";
 import { optimizeClasses } from "./optimizeClasses";
-import { Properties } from "./Properties";
 
 export function cssPropsToClasses(props: Partial<Properties>) {
   const classes: string[] = [];

@@ -1,5 +1,5 @@
-import { isTextDomNode } from "./figmaNodeToDomNode";
-import { DomNode } from "./DomNode";
+import { isTextDomNode } from "../figmaNodeToDomNode";
+import { DomNode } from "../DomNode";
 import { nodeToTernalyOperator } from "./nodeToTernalyOperator";
 import { variantsToTernaryOperator } from "./variantsToTernaryOperator";
 

@@ -1,8 +1,8 @@
 import {
   figmaNodeToDomNode,
-  stylesToClassAttrsRecursive,
 } from "./converter/figmaNodeToDomNode";
-import { domNodeToHtml } from "./converter/domNodeToHtml";
+import { stylesToClassAttrsRecursive } from "./converter/react/stylesToClassAttrsRecursive";
+import { domNodeToHtml } from "./converter/react/domNodeToHtml";
 import { DomNode } from "./converter/DomNode";
 import { parseDomName } from "./parseDomName";
 import { createCssVars, colorsToCssVars } from "./initFigmaPlugin";

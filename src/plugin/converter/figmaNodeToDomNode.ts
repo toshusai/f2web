@@ -10,7 +10,6 @@ import { toCamelCase } from "js-convert-case";
 import { convertToCssProperties } from "./convertToCssProperties";
 import { AttrType, AttrValue } from "./AttrValue";
 import { domToDomNode } from "./domToDomNode";
-import { cssPropsToClasses } from "./cssPropsToClasses";
 var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
@@ -75,33 +74,6 @@ type Native = {
   value: "string";
   optional?: boolean;
 };
-
-export function stylesToClassAttrsRecursive(domNode: DomNode) {
-  if (isTextDomNode(domNode)) {
-    if (domNode.valueType === "variable") {
-      domNode.value = `{props.${domNode.value}}`;
-    }
-    return;
-  }
-  if (domNode.styles) {
-    if (!domNode.attrs) {
-      domNode.attrs = {};
-    }
-    domNode.attrs.class = {
-      type: AttrType.VALUE,
-      value: cssPropsToClasses(domNode.styles).join(" "),
-    };
-    Object.keys(domNode.attrs).forEach((key) => {
-      domNode.attrs = domNode.attrs ?? {};
-      if (domNode.attrs[key].type === AttrType.VARIABLE) {
-        domNode.attrs[key].value = `props.${domNode.attrs[key].value}`;
-      }
-    });
-  }
-  if (domNode.children) {
-    domNode.children.forEach((child) => stylesToClassAttrsRecursive(child));
-  }
-}
 
 export async function figmaNodeToDomNode(
   node: SceneNode,
