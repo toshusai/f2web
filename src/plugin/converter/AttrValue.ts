@@ -1,5 +1,10 @@
+export enum AttrType {
+  VARIABLE = "variable",
+  VALUE = "value",
+}
+
 export type AttrValue = {
-  type: "variable" | "value";
+  type: AttrType;
   value: string;
   variants?: Record<string, AttrValue>;
 };

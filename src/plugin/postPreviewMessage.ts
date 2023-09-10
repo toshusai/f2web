@@ -1,4 +1,7 @@
-import { figmaNodeToDomNode } from "./converter/figmaNodeToDomNode";
+import {
+  figmaNodeToDomNode,
+  stylesToClassAttrsRecursive,
+} from "./converter/figmaNodeToDomNode";
 import { domNodeToHtml } from "./converter/domNodeToHtml";
 import { DomNode } from "./converter/DomNode";
 import { parseDomName } from "./parseDomName";
@@ -19,6 +22,9 @@ export async function postPreviewMessage() {
     )
   ).filter((x) => x !== null) as DomNode[];
   if (!domNodes) return;
+  domNodes.forEach((x) => {
+    stylesToClassAttrsRecursive(x);
+  });
   const html = domNodeToHtml(domNodes[0], 0, true);
 
   ctx.ignoreInstance = false;
@@ -28,6 +34,9 @@ export async function postPreviewMessage() {
     )
   ).filter((x) => x !== null) as DomNode[];
   if (!rawDomNodes) return;
+  rawDomNodes.forEach((x) => {
+    stylesToClassAttrsRecursive(x);
+  });
 
   const { cssVars, colors } = createCssVars();
   if (colors) {

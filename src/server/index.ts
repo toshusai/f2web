@@ -12,7 +12,7 @@ app.use((_, res, next) => {
   next();
 });
 
-const DIR = "";
+const DIR = "/Users/notnull/Develop/shu-web-dev/src";
 
 app.post("/api/v1/create", (req, res) => {
   const src = req.body.src;

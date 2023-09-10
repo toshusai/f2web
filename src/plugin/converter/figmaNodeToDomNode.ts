@@ -4,11 +4,13 @@ import { TextDecoder } from "./TextDecoder";
 import { handleInstanceNode } from "./handleInstanceNode";
 import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
-import { cssPropsToClasses } from "./cssPropsToClasses";
 import { DomMeta } from "../DomMeta";
 import { parseDomName } from "../parseDomName";
 import { toCamelCase } from "js-convert-case";
 import { convertToCssProperties } from "./convertToCssProperties";
+import { AttrType, AttrValue } from "./AttrValue";
+import { domToDomNode } from "./domToDomNode";
+import { cssPropsToClasses } from "./cssPropsToClasses";
 var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
@@ -50,34 +52,40 @@ export type Props = {
   };
 };
 
+export function stylesToClassAttrsRecursive(domNode: DomNode) {
+  if (isTextDomNode(domNode)) return;
+  if (domNode.styles) {
+    if (!domNode.attrs) {
+      domNode.attrs = {};
+    }
+    domNode.attrs.class = {
+      type: AttrType.VALUE,
+      value: cssPropsToClasses(domNode.styles).join(" "),
+    };
+  }
+  if (domNode.children) {
+    domNode.children.forEach((child) => stylesToClassAttrsRecursive(child));
+  }
+}
+
 export async function figmaNodeToDomNode(
   node: SceneNode,
   ctx: Context
 ): Promise<DomNode | null> {
   if (!ctx.depth) ctx.depth = 0;
 
-  let attrs: Record<
-    string,
-    {
-      type: "variable";
-      value: string;
-    }
-  > = {};
-  const props = await convertToCssProperties(node, ctx);
-  if (!props) return null;
-  const classes = cssPropsToClasses(props);
+  let attrs: Record<string, AttrValue> = {};
+  const styles = await convertToCssProperties(node, ctx);
+  if (!styles) return null;
   if (node.parent?.type === "COMPONENT_SET") {
     ctx.props = {
       ...variantToProps(node.parent),
     };
-    if (classes.includes("w-full")) {
-      // ctx.storyLayout = "fullscreen";
-    }
 
     if (ctx.meta) {
       ctx.meta.attributes.forEach((attr) => {
         attrs[attr.key] = {
-          type: "variable",
+          type: AttrType.VARIABLE,
           value: `props.${convertToVariantAvairableName(attr.value)}`,
         };
         ctx.props = ctx.props ?? {};
@@ -101,7 +109,7 @@ export async function figmaNodeToDomNode(
         defaultValue: `${attr.key}`,
       };
       attrs[attr.key] = {
-        type: "variable",
+        type: AttrType.VARIABLE,
         value: `props.${convertToVariantAvairableName(attr.value)}`,
       };
     });
@@ -109,7 +117,7 @@ export async function figmaNodeToDomNode(
 
   if (!supportedNodes(node)) return null;
   if (!node.visible) {
-    classes.push("hidden");
+    styles.display = "hidden";
   }
   const ignoreInstance =
     node.type === "INSTANCE" && ctx.ignoreInstance === true;
@@ -119,46 +127,19 @@ export async function figmaNodeToDomNode(
     const parser = new DomParser();
     const svgDom = parser.parseFromString(svg);
 
-    const domToDomNode = (dom: any) => {
-      if (!dom.childNodes) return null;
-      const children = dom.childNodes
-        .map((child: any) => domToDomNode(child))
-        .filter((x: any) => x !== null);
-      const attrs: any = {};
-      dom.attributes?.forEach((attr: any) => {
-        if (attr.name === "fill") {
-          if (!isMixed(node.fills)) {
-            attrs["fill"] = "currentColor";
-            return;
-          }
-        }
-        attrs[attr.name] = attr.value;
-      });
-      return {
-        type: dom.nodeName,
-        attrs,
-        children,
-      };
-    };
-
-    const svgNode = domToDomNode(svgDom.getElementsByTagName("svg")[0]);
+    const svgNode = domToDomNode(node, svgDom.getElementsByTagName("svg")[0]);
     if (!svgNode) throw new Error("svgNode is null");
-    svgNode.attrs.class = {
-      type: "value",
-      value: classes.join(" "),
-    };
+    if (isTextDomNode(svgNode)) return null;
+    svgNode.styles = styles;
     return svgNode;
   }
   if (node.type === "FRAME" || node.type === "COMPONENT" || ignoreInstance) {
-    ctx.depth++;
     const childrenPromises = node.children.map(
       async (child) => await figmaNodeToDomNode(child, ctx)
     );
     const children = (await Promise.all(childrenPromises)).filter(
       (x) => x !== null
     ) as DomNode[];
-    ctx.depth--;
-    const joinedClasses = classes.join(" ");
     let name = "div";
     if (node.parent?.type === "COMPONENT_SET") {
       name = ctx.meta?.tagName ?? "div";
@@ -168,83 +149,66 @@ export async function figmaNodeToDomNode(
     return {
       type: name,
       name: node.name,
-      attrs: {
-        class: {
-          value: joinedClasses,
-          type: "value",
-        },
-        ...attrs,
-      },
+      attrs,
+      styles: styles,
       children: children,
     };
   }
 
   if (node.type === "INSTANCE") {
-    ctx.depth++;
     const r = handleInstanceNode(node, ctx);
-    ctx.depth--;
     if (r.type !== "text" && "attrs" in r) {
       return {
         ...r,
-        attrs: {
-          class: {
-            value: classes.join(" "),
-            type: "value",
-          },
-          ...r.attrs,
-        },
+        styles,
       };
     }
     return r;
   }
 
   if (node.type === "TEXT") {
-    if (node.componentPropertyReferences?.characters) {
-      for (const key in ctx.root.componentPropertyDefinitions) {
-        if (node.componentPropertyReferences.characters === key) {
-          ctx.props = ctx.props ?? {};
-          ctx.props[convertToVariantAvairableName(key)] = {
-            type: "string",
-            defaultValue: node.characters,
-          };
-          return {
-            type: "div",
-            attrs: {
-              class: {
-                value: classes.join(" "),
-                type: "value",
-              },
-              ...attrs,
-            },
-            children: [
-              {
-                type: "text",
-                value: `{props.${convertToVariantAvairableName(key)}}`,
-                valueType: "variable",
-              },
-            ],
-          };
-        }
-      }
-    }
-    return {
-      type: "div",
-      attrs: {
-        class: {
-          value: classes.join(" "),
-          type: "value",
-        },
-      },
-      children: [
-        {
-          type: "text",
-          value: node.characters,
-          valueType: "string",
-        },
-      ],
-    };
+    const textNode = handleTextNode(node, ctx);
+    if (isTextDomNode(textNode)) return null;
+    textNode.styles = styles;
+    return textNode;
   }
   return null;
+}
+
+export function handleTextNode(node: TextNode, ctx: Context): DomNode {
+  if (node.componentPropertyReferences?.characters) {
+    for (const key in ctx.root.componentPropertyDefinitions) {
+      if (node.componentPropertyReferences.characters === key) {
+        ctx.props = ctx.props ?? {};
+        ctx.props[convertToVariantAvairableName(key)] = {
+          type: "string",
+          defaultValue: node.characters,
+        };
+        return {
+          type: "div",
+          attrs: {},
+          children: [
+            {
+              type: "text",
+              value: `{props.${convertToVariantAvairableName(key)}}`,
+              valueType: "variable",
+            },
+          ],
+        };
+      }
+    }
+  }
+  return {
+    type: "div",
+    attrs: {},
+    children: [
+      {
+        type: "text",
+        value: node.characters,
+        valueType: "string",
+      },
+    ],
+  };
 }
 
 export function convertToVariantAvairableName(name: string) {
