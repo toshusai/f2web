@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Resize } from "./Resize";
 import "highlight.js/styles/vs2015.css";
 import hljs from "highlight.js";
+import typescript from "highlight.js/lib/languages/typescript";
 import { addMessageEventListener } from "../addMessageEventListener";
 import { getReactSrc } from "../../plugin/converter/getReactSrc";
 import { getStoriesSrc } from "../../plugin/converter/getStoriesSrc";
@@ -47,6 +48,7 @@ async function post(path: string, body: any) {
 
 export function App() {
   useEffect(() => {
+    hljs.registerLanguage("typescript", typescript);
     return addMessageEventListener("selection", (message) => {
       const { html, ctx, cssVars, domNodes } = message;
       const preview = document.getElementById("preview");
@@ -62,7 +64,10 @@ export function App() {
           html2 = html2.replace(new RegExp(key, "g"), url);
         });
       }
-      preview.innerHTML = html2;
+      preview.innerHTML = prettier.format(html2, {
+        parser: "html",
+        plugins: prettierPlugins,
+      });
 
       const style = document.getElementById("tailwind");
       if (!style) return;
@@ -83,15 +88,19 @@ export function App() {
       const stories = getStoriesSrc(ctx);
       const colorsCss = cssVarsToCssText(cssVars);
       const tailwindColors = `export default ${JSON.stringify(ctx.colors)}`;
+      const formatted = prettier.format(src, {
+        parser: "typescript",
+        plugins: prettierPlugins,
+      });
 
       post("/api/v1/create", {
-        src,
+        src: formatted,
         name: ctx.name,
         stories,
         colorsCss,
         tailwindColors,
       });
-      codeContent.textContent = src;
+      codeContent.textContent = formatted;
       hljs.highlightAll();
 
       tailwind.config = {

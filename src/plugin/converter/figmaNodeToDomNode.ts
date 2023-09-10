@@ -5,7 +5,8 @@ import { handleInstanceNode } from "./handleInstanceNode";
 import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
 import { convertToClasses } from "./convertToClasses";
-import { DomMeta, parseDomName } from "../initFigmaPlugin";
+import { DomMeta } from "../DomMeta";
+import { parseDomName } from "../parseDomName";
 import { toCamelCase } from "js-convert-case";
 var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
@@ -72,14 +73,14 @@ export async function figmaNodeToDomNode(
 
     if (ctx.meta) {
       ctx.meta.attributes.forEach((attr) => {
-        attrs[attr] = {
+        attrs[attr.key] = {
           type: "variable",
-          value: `props.${convertToVariantAvairableName(attr)}`,
+          value: `props.${convertToVariantAvairableName(attr.value)}`,
         };
         ctx.props = ctx.props ?? {};
-        ctx.props[convertToVariantAvairableName(attr)] = {
-          type: `?JSX.IntrinsicElements["${ctx.meta!.tagName}"]["${attr}"]`,
-          defaultValue: "",
+        ctx.props[convertToVariantAvairableName(attr.value)] = {
+          type: `?JSX.IntrinsicElements["${ctx.meta!.tagName}"]["${attr.key}"]`,
+          defaultValue: `${attr.key}`,
         };
       });
     }
@@ -89,16 +90,16 @@ export async function figmaNodeToDomNode(
   if (domName.meta.attributes.length > 0) {
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};
-      ctx.props[convertToVariantAvairableName(attr)] = {
+      ctx.props[convertToVariantAvairableName(attr.value)] = {
         type:
           node.type === "INSTANCE"
-            ? `React.ComponentProps<typeof ${domName.name}>["${attr}"]`
-            : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr}"]`,
-        defaultValue: "",
+            ? `React.ComponentProps<typeof ${domName.name}>["${attr.key}"]`
+            : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr.key}"]`,
+        defaultValue: `${attr.key}`,
       };
-      attrs[attr] = {
+      attrs[attr.key] = {
         type: "variable",
-        value: `props.${convertToVariantAvairableName(attr)}`,
+        value: `props.${convertToVariantAvairableName(attr.value)}`,
       };
     });
   }

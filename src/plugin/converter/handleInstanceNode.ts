@@ -1,9 +1,32 @@
-import { Context, convertToVariantAvairableName } from "./figmaNodeToDomNode";
+import {
+  Context,
+  convertToVariantAvairableName,
+  isTextDomNode,
+} from "./figmaNodeToDomNode";
 import { AttrValue } from "./AttrValue";
 import { DomNode } from "./DomNode";
-import { parseDomName } from "../initFigmaPlugin";
+import { parseDomName } from "../parseDomName";
+function findComponentPropertyReferences(
+  node: SceneNode,
+  key: string
+): InstanceNode | null {
+  if (node.componentPropertyReferences?.mainComponent === key) {
+    return node as InstanceNode;
+  }
+  if ("children" in node) {
+    for (const child of node.children) {
+      const id = findComponentPropertyReferences(child, key);
+      if (id) return id;
+    }
+  }
 
-export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
+  return null;
+}
+export function handleInstanceNode(
+  node: InstanceNode,
+  ctx: Context,
+  ignoreInstance = false
+): DomNode {
   if (!node.mainComponent) {
     throw new Error("node.mainComponent is null");
   }
@@ -33,6 +56,7 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
 
   const attrs: Record<string, AttrValue> = {};
   Object.entries(node.componentProperties).forEach(([key, value]) => {
+    console.log(node.name, key, value);
     const attrKey = convertToVariantAvairableName(key);
     if (value.type === "TEXT") {
       attrs[attrKey] = {
@@ -44,7 +68,7 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
         | ComponentSetNode
         | undefined;
       if (!componentSet) throw new Error("componentSet is null");
-      const variant = componentSet.variantGroupProperties[attrKey];
+      const variant = componentSet.variantGroupProperties[key];
       if (variant && variant.values.length > 1) {
         attrs[attrKey] = { value: value.value.toString(), type: "value" };
       }
@@ -60,31 +84,79 @@ export function handleInstanceNode(node: InstanceNode, ctx: Context): DomNode {
       const componentSet = component.parent as ComponentSetNode | undefined;
       if (!componentSet) throw new Error("componentSet is null");
 
-      const nameToTag = component.name
-        .split(",")
-        .map((x) => {
-          const sp = x.split("=");
-          const variant = componentSet.variantGroupProperties[sp[0]];
-          if (!variant) return "";
-          if (variant.values.length <= 1) return "";
-          return `${convertToVariantAvairableName(sp[0])}="${sp[1]}"`;
-        })
-        .join(" ");
-
+      const id = findComponentPropertyReferences(node, key);
       ctx.dependencies = ctx.dependencies ?? {};
       ctx.dependencies[name] = "INSTANCE";
-      attrs[attrKey] = {
-        type: "variable",
-        value: `<${name} ${nameToTag} />`,
-      };
+      if (id) {
+        const z = handleInstanceNode(id, ctx, ignoreInstance);
+        // Object.keys(id.componentProperties).forEach((key) => {
+        //   const prop = id.componentProperties[key];
+        //   if (prop.type === "INSTANCE_SWAP") {
+        //     const node = figma.getNodeById(prop.value.toString());
+        //     if (node) {
+        //       subAttrs[convertToVariantAvairableName(key)] = {
+        //         type: "variable",
+        //         value: `<${node.parent?.name} />`,
+        //       };
+        //       ctx.dependencies = ctx.dependencies ?? {};
+        //       ctx.dependencies[node.parent?.name ?? ""] = "INSTANCE";
+        //     }
+        //   } else {
+        //     subAttrs[key] = {
+        //       type: "value",
+        //       value: prop.value.toString(),
+        //     };
+        //   }
+        // });
+        if (isTextDomNode(z)) {
+          throw new Error("z is text");
+        }
+        attrs[convertToVariantAvairableName(key)] = {
+          type: "variable",
+          value: `<${z.type} ${Object.entries(z.attrs ?? {})
+            .map(([key, value]) => {
+              if (value.type === "variable") {
+                return `${key}={${value.value}}`;
+              } else {
+                return `${key}="${value.value}"`;
+              }
+            })
+            .join(" ")} />`,
+        };
+      }
+
+      // component.name.split(",").map((x) => {
+      //   const sp = x.split("=");
+      //   const variant = componentSet.variantGroupProperties[sp[0]];
+      //   if (!variant) return "";
+      //   if (variant.values.length <= 1) return "";
+      //   subAttrs[sp[0]] = {
+      //     type: "value",
+      //     value: sp[1],
+      //   };
+      // return `${convertToVariantAvairableName(sp[0])}="${sp[1]}"`;
+      // });
+
+      // attrs[attrKey] = {
+      //   type: "variable",
+      //   value: `<${name} ${Object.entries(subAttrs)
+      //     .map(([key, value]) => {
+      //       if (value.type === "variable") {
+      //         return `${key}={${value.value}}`;
+      //       } else {
+      //         return `${key}="${value.value}"`;
+      //       }
+      //     })
+      //     .join(" ")} />`,
+      // };
     }
   });
   const domName = parseDomName(node.name);
   if (domName.meta.attributes.length > 0) {
     domName.meta.attributes.forEach((attr) => {
-      attrs[attr] = {
+      attrs[attr.key] = {
         type: "variable",
-        value: `props.${convertToVariantAvairableName(attr)}`,
+        value: `props.${convertToVariantAvairableName(attr.value)}`,
       };
     });
   }

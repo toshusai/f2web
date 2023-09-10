@@ -1,10 +1,6 @@
 import { colorToHex } from "./colorToHex";
-import {
-  convertToCssAvairableName,
-  figmaNodeToDomNode,
-} from "./converter/figmaNodeToDomNode";
-import { domNodeToHtml } from "./converter/domNodeToHtml";
-import { DomNode } from "./converter/DomNode";
+import { convertToCssAvairableName } from "./converter/figmaNodeToDomNode";
+import { postPreviewMessage } from "./postPreviewMessage";
 
 /**
  * CSS Variables
@@ -28,7 +24,7 @@ type Colors = {
  */
 type CssVars = Record<string, Record<string, string>>;
 
-function colorsToCssVars(colors: Colors, cssVars: CssVars) {
+export function colorsToCssVars(colors: Colors, cssVars: CssVars) {
   Object.keys(colors).forEach((key) => {
     const variable = figma.variables.getVariableById(colors[key]);
     if (variable) {
@@ -64,7 +60,7 @@ function colorsToCssVars(colors: Colors, cssVars: CssVars) {
   });
 }
 
-function createCssVars() {
+export function createCssVars() {
   const cssVars: CssVars = {};
   const colors = figma.variables.getLocalVariables("COLOR");
   const allColors = {};
@@ -138,87 +134,4 @@ export function initFigmaPlugin() {
     });
     figma.on("documentchange", () => {});
   }
-}
-
-// get "div" from "<div>"
-function getTag(name: string) {
-  const reg = /<([a-zA-Z0-9-]+)(\s|>)/;
-  const result = name.match(reg);
-  if (result) {
-    return result[1];
-  }
-  return "div";
-}
-
-// get "onClick, className" from "[onClick, className]"
-function getAttribute(name: string): string[] {
-  const reg = /\[([a-zA-Z0-9-,\s]+)\]/;
-  const result = name.match(reg);
-  if (result) {
-    return result[1].split(",").map((x) => x.trim());
-  }
-  return [];
-}
-
-export type DomMeta = {
-  tagName: string;
-  attributes: string[];
-};
-
-export function parseDomName(name: string): {
-  name: string;
-  meta: DomMeta;
-} {
-  const sp = name.split("#");
-  const meta = sp[1] ?? "";
-
-  const domName = sp[0];
-  return {
-    name: convertToCssAvairableName(domName),
-    meta: {
-      tagName: getTag(meta),
-      attributes: getAttribute(meta),
-    },
-  };
-}
-
-async function postPreviewMessage() {
-  const node = figma.currentPage.selection[0];
-  if (!node) return;
-  if (node.type !== "COMPONENT_SET") return;
-  const ctx: any = {
-    root: node,
-    ignoreInstance: true,
-    ...parseDomName(node.name),
-  };
-  const domNodes = (
-    await Promise.all(
-      node.children.map((child) => figmaNodeToDomNode(child, ctx))
-    )
-  ).filter((x) => x !== null) as DomNode[];
-  if (!domNodes) return;
-  const html = domNodeToHtml(domNodes[0], 0, true);
-
-  ctx.ignoreInstance = false;
-  const rawDomNodes = (
-    await Promise.all(
-      node.children.map((child) => figmaNodeToDomNode(child, ctx))
-    )
-  ).filter((x) => x !== null) as DomNode[];
-  if (!rawDomNodes) return;
-
-  const { cssVars, colors } = createCssVars();
-  if (colors) {
-    colorsToCssVars(colors, cssVars);
-  }
-  ctx.colors = colors;
-  figma.ui.postMessage({
-    type: "selection",
-    message: {
-      domNodes: rawDomNodes,
-      html: html,
-      ctx: ctx,
-      cssVars,
-    },
-  });
 }
