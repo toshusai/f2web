@@ -3,13 +3,12 @@ import { supportedNodes } from "./supportedNodes";
 import {
   Context,
   isMixed,
-  convertToCssAvairableName
+  convertToCssAvairableName,
 } from "./figmaNodeToDomNode";
 import { Properties } from "./Properties";
 
-
 export async function convertToCssProperties(node: SceneNode, ctx: Context) {
-  if (!supportedNodes(node)) return [];
+  if (!supportedNodes(node)) return null;
   const props: Partial<Properties> = {};
 
   // height
@@ -282,7 +281,9 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       const effect = node.effects[0];
       if (effect.type === "DROP_SHADOW") {
         const hex = colorToHex(effect.color, effect.color.a ?? 1);
-        props.boxShadow = `${effect.offset.x}px ${effect.offset.y}px ${effect.radius}px ${effect.spread ?? 0}px ${hex}`;
+        props.boxShadow = `${effect.offset.x}px ${effect.offset.y}px ${
+          effect.radius
+        }px ${effect.spread ?? 0}px ${hex}`;
       }
     }
   }
@@ -302,7 +303,9 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       if (paints.length === 1) {
         const paint = paints[0];
         if (paint.type === "GRADIENT_LINEAR") {
-          throw new Error(`unsupported GRADIENT_LINEAR`);
+          // throw new Error(`unsupported GRADIENT_LINEAR`);
+          props.backgroundColor =
+            "linear-gradient(to right bottom, #000000, #ffffff)";
         } else {
           props.backgroundColor = name;
         }

@@ -4,10 +4,11 @@ import { TextDecoder } from "./TextDecoder";
 import { handleInstanceNode } from "./handleInstanceNode";
 import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
-import { convertToClasses } from "./convertToClasses";
+import { cssPropsToClasses } from "./cssPropsToClasses";
 import { DomMeta } from "../DomMeta";
 import { parseDomName } from "../parseDomName";
 import { toCamelCase } from "js-convert-case";
+import { convertToCssProperties } from "./convertToCssProperties";
 var DomParser = require("dom-parser");
 export function isMixed(mixed: any): mixed is typeof figma.mixed {
   if (typeof figma === "undefined") {
@@ -62,7 +63,9 @@ export async function figmaNodeToDomNode(
       value: string;
     }
   > = {};
-  const classes = await convertToClasses(node, ctx);
+  const props = await convertToCssProperties(node, ctx);
+  if (!props) return null;
+  const classes = cssPropsToClasses(props);
   if (node.parent?.type === "COMPONENT_SET") {
     ctx.props = {
       ...variantToProps(node.parent),

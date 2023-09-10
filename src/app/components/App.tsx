@@ -64,11 +64,7 @@ export function App() {
           html2 = html2.replace(new RegExp(key, "g"), url);
         });
       }
-      preview.innerHTML = prettier.format(html2, {
-        parser: "html",
-        plugins: prettierPlugins,
-      });
-
+      preview.innerHTML = html2;
       const style = document.getElementById("tailwind");
       if (!style) return;
       style.innerHTML = cssVarsToCssText(cssVars);
