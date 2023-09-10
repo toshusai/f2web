@@ -50,6 +50,10 @@ export async function figmaNodeToDomNode(
 
   const domName = parseDomName(node.name);
   if (domName.meta.attributes.length > 0) {
+    let name = domName.name;
+    if (node.type === "INSTANCE") {
+      name = node.mainComponent?.parent?.name ?? domName.name;
+    }
     domName.meta.attributes.forEach((attr) => {
       ctx.props = ctx.props ?? {};
       ctx.props[convertToVariantAvairableName(attr.value)] = {
@@ -59,12 +63,11 @@ export async function figmaNodeToDomNode(
         //     : `?JSX.IntrinsicElements["${domName.meta.tagName}"]["${attr.key}"]`,
         type: {
           type: "typeof",
-          typeName:
-            node.type === "INSTANCE" ? domName.name : domName.meta.tagName,
+          typeName: node.type === "INSTANCE" ? name : domName.meta.tagName,
           propName: attr.key,
           optional: node.type !== "INSTANCE",
         },
-        defaultValue: `${attr.key}`,
+        defaultValue: `"${attr.key}"`,
       };
       attrs[attr.key] = {
         type: AttrType.VARIABLE,

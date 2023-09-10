@@ -10,7 +10,8 @@ export function contextPropsToReactPropsString(props: Props) {
   return `props: {
 ${keys
   .map((key) => {
-    const optional = props[key].type.toString().startsWith("?") ? "?" : "";
+    const type = props[key].type;
+    const optional = "optional" in type && type.optional ? "?" : "";
     return `${indent}${key}${optional}: ${type2TypeScriptType(
       props[key].type
     )};`;

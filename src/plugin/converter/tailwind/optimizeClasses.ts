@@ -43,5 +43,6 @@ export function optimizeClasses(classes: string[]) {
     }
   }
 
-  return classes;
+  // return sorted by alphabet
+  return classes.sort((a, b) => a.localeCompare(b));
 }

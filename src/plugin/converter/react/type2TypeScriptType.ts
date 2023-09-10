@@ -15,9 +15,7 @@ export function type2TypeScriptType(type: PropType) {
       result = `JSX.IntrinsicElements["${type.typeName}"]["${type.propName}"]`;
     }
   }
-  if ("optional" in type && type.optional) {
-    result = `?${result}`;
-  }
+
   return result;
 }
 

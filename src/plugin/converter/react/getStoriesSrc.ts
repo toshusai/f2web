@@ -21,13 +21,17 @@ export const Basic: Story = {
     ${Object.keys(ctx.props ?? {})
       .map((key) => {
         if (!ctx.props) return "";
-        if (ctx.props[key].type.type === "native") {
+        const type = ctx.props[key].type;
+        if (type.type === "native") {
           return `${key}: "${ctx.props[key].defaultValue}"`;
-        } else if (ctx.props[key].type.type === "INSTANCE") {
+        } else if (type.type === "INSTANCE") {
           return `${key}: <div className="rounded-[4px] bg-gradient-to-br from-red-500 to-blue-500 p-[8px] text-white">props.${key}</div>`;
-        } else if (ctx.props[key].type.type === "union") {
+        } else if (type.type === "union") {
           const defaultValue = ctx.props[key].defaultValue;
           if (!defaultValue) return "";
+          return `${key}: ${defaultValue}`;
+        } else if (type.type === "typeof") {
+          const defaultValue = ctx.props[key].defaultValue;
           return `${key}: ${defaultValue}`;
         }
         return ``;

@@ -92,7 +92,10 @@ export function App() {
       post("/api/v1/create", {
         src: formatted,
         name: ctx.name,
-        stories,
+        stories: prettier.format(stories, {
+          parser: "typescript",
+          plugins: prettierPlugins,
+        }),
         colorsCss,
         tailwindColors,
       });

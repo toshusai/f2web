@@ -7,10 +7,12 @@ export function parseDomName(name: string): {
 } {
   const sp = name.split("#");
 
+  const meta = parseTagAndAttrs(name);
   const domName = sp[0];
+
   return {
     name: convertToCssAvairableName(domName),
-    meta: parseTagAndAttrs(name),
+    meta,
   };
 }
 
