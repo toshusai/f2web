@@ -3,8 +3,8 @@ import {
 } from "./converter/figmaNodeToDomNode";
 import { stylesToClassAttrsRecursive } from "./converter/react/stylesToClassAttrsRecursive";
 import { domNodeToHtml } from "./converter/react/domNodeToHtml";
-import { DomNode } from "./converter/DomNode";
-import { parseDomName } from "./parseDomName";
+import { DomNode } from "./types/DomNode";
+import { parseDomName } from "./converter/parseDomName";
 import { createCssVars, colorsToCssVars } from "./initFigmaPlugin";
 
 export async function postPreviewMessage() {

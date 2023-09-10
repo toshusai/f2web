@@ -1,5 +1,5 @@
-import { colorToHex } from "./colorToHex";
-import { convertToCssAvairableName } from "./converter/figmaNodeToDomNode";
+import { colorToHex } from "./utils/colorToHex";
+import { convertToCssAvairableName } from "./converter/convertToCssAvairableName";
 import { postPreviewMessage } from "./postPreviewMessage";
 
 /**

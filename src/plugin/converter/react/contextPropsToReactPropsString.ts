@@ -1,4 +1,4 @@
-import { Props } from "../figmaNodeToDomNode";
+import { Props } from "../../types/Props";
 import { type2TypeScriptType } from "./type2TypeScriptType";
 
 export function contextPropsToReactPropsString(props: Props) {

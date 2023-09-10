@@ -1,11 +1,9 @@
-import { colorToHex } from "../colorToHex";
+import { colorToHex } from "../utils/colorToHex";
 import { supportedNodes } from "./supportedNodes";
-import {
-  Context,
-  isMixed,
-  convertToCssAvairableName,
-} from "./figmaNodeToDomNode";
-import { Properties } from "./Properties";
+import { isMixed } from "../utils/isMixed";
+import { convertToCssAvairableName } from "./convertToCssAvairableName";
+import { Context } from "../types/Context";
+import { Properties } from "../types/Properties";
 
 export async function convertToCssProperties(node: SceneNode, ctx: Context) {
   if (!supportedNodes(node)) return null;

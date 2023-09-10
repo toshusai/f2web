@@ -1,5 +1,5 @@
-import { DomNode } from "../DomNode";
-import { AttrType } from "../AttrValue";
+import { DomNode } from "../../types/DomNode";
+import { AttrType } from "../../types/AttrValue";
 import { isTextDomNode } from "../figmaNodeToDomNode";
 import { cssPropsToClasses } from "../tailwind/cssPropsToClasses";
 

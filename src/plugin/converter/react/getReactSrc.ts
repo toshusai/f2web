@@ -1,7 +1,7 @@
 import { domNodeToHtml } from "./domNodeToHtml";
-import { DomNode } from "../DomNode";
+import { DomNode } from "../../types/DomNode";
 import { contextPropsToReactPropsString } from "./contextPropsToReactPropsString";
-import { Context } from "../figmaNodeToDomNode";
+import { Context } from "../../types/Context";
 
 export function getReactSrc(node: DomNode, ctx: Context) {
   const jsx = domNodeToHtml(node, 2, false, true);

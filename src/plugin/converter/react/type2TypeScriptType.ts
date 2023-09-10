@@ -1,4 +1,4 @@
-import { PropType } from "../figmaNodeToDomNode";
+import { PropType } from "../../types/Props";
 
 export function type2TypeScriptType(type: PropType) {
   let result = "";

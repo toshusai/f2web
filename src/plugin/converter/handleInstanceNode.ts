@@ -1,27 +1,12 @@
 import {
-  Context,
   convertToVariantAvairableName,
   isTextDomNode,
 } from "./figmaNodeToDomNode";
-import { AttrType, AttrValue } from "./AttrValue";
-import { DomNode } from "./DomNode";
-import { parseDomName } from "../parseDomName";
-function findComponentPropertyReferences(
-  node: SceneNode,
-  key: string
-): InstanceNode | null {
-  if (node.componentPropertyReferences?.mainComponent === key) {
-    return node as InstanceNode;
-  }
-  if ("children" in node) {
-    for (const child of node.children) {
-      const id = findComponentPropertyReferences(child, key);
-      if (id) return id;
-    }
-  }
+import { Context } from "../types/Context";
+import { AttrType, AttrValue } from "../types/AttrValue";
+import { DomNode } from "../types/DomNode";
+import { parseDomName } from "./parseDomName";
 
-  return null;
-}
 export function handleInstanceNode(
   node: InstanceNode,
   ctx: Context,
@@ -169,4 +154,21 @@ export function handleInstanceNode(
     type: tag,
     attrs: attrs,
   };
+}
+
+function findComponentPropertyReferences(
+  node: SceneNode,
+  key: string
+): InstanceNode | null {
+  if (node.componentPropertyReferences?.mainComponent === key) {
+    return node as InstanceNode;
+  }
+  if ("children" in node) {
+    for (const child of node.children) {
+      const id = findComponentPropertyReferences(child, key);
+      if (id) return id;
+    }
+  }
+
+  return null;
 }

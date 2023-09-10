@@ -6,7 +6,7 @@ import typescript from "highlight.js/lib/languages/typescript";
 import { addMessageEventListener } from "../addMessageEventListener";
 import { getReactSrc } from "../../plugin/converter/react/getReactSrc";
 import { getStoriesSrc } from "../../plugin/converter/react/getStoriesSrc";
-import { convertToCssAvairableName } from "../../plugin/converter/figmaNodeToDomNode";
+import { convertToCssAvairableName } from "../../plugin/converter/convertToCssAvairableName";
 import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
 
 declare const prettierPlugins: any;

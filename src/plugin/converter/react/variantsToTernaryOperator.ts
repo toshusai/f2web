@@ -1,5 +1,5 @@
 import { convertToVariantAvairableName } from "../figmaNodeToDomNode";
-import { AttrValue } from "../AttrValue";
+import { AttrValue } from "../../types/AttrValue";
 
 /**
  * { "key=value": { type: "value", value: "valriantValue" } } => key={props.key==="value" ? "valriantValue" : "defaultValue"}

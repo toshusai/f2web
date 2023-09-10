@@ -1,4 +1,4 @@
-import { Properties } from "../Properties";
+import { Properties } from "../../types/Properties";
 import { optimizeClasses } from "./optimizeClasses";
 
 export function cssPropsToClasses(props: Partial<Properties>) {

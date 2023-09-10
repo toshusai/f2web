@@ -1,5 +1,5 @@
 import { convertToVariantAvairableName } from "../figmaNodeToDomNode";
-import { DomNode } from "../DomNode";
+import { DomNode } from "../../types/DomNode";
 import { domNodeToHtml } from "./domNodeToHtml";
 
 export function nodeToTernalyOperator(

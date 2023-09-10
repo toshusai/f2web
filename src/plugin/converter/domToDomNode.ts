@@ -1,6 +1,6 @@
-import { DomNode } from "./DomNode";
-import { isMixed } from "./figmaNodeToDomNode";
-import { IDomNode } from "./IDomNode";
+import { DomNode } from "../types/DomNode";
+import { isMixed } from "../utils/isMixed";
+import { IDomNode } from "../types/IDomNode";
 
 export function domToDomNode(node: VectorNode, dom: IDomNode): DomNode | null {
   if (!dom.childNodes) return null;

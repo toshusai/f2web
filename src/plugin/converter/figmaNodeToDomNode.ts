@@ -1,79 +1,17 @@
-import { DomNode } from "./DomNode";
-import { TextDomNode } from "./TextDomNode";
-import { TextDecoder } from "./TextDecoder";
+import { DomNode } from "../types/DomNode";
+import { TextDomNode } from "../types/TextDomNode";
+import { TextDecoder } from "../utils/TextDecoder";
 import { handleInstanceNode } from "./handleInstanceNode";
 import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
-import { DomMeta } from "../DomMeta";
-import { parseDomName } from "../parseDomName";
+import { parseDomName } from "./parseDomName";
 import { toCamelCase } from "js-convert-case";
 import { convertToCssProperties } from "./convertToCssProperties";
-import { AttrType, AttrValue } from "./AttrValue";
+import { AttrType, AttrValue } from "../types/AttrValue";
 import { domToDomNode } from "./domToDomNode";
+import { Context } from "../types/Context";
+
 var DomParser = require("dom-parser");
-export function isMixed(mixed: any): mixed is typeof figma.mixed {
-  if (typeof figma === "undefined") {
-    return false;
-  }
-  return mixed === figma.mixed;
-}
-
-export function removeHyphen(name: string) {
-  return name.replace(/-/g, "");
-}
-
-export function convertToCssAvairableName(name: string) {
-  return removeHyphen(name.replace(/[^a-zA-Z0-9-]/g, "-"));
-}
-
-export type Context = {
-  root: ComponentSetNode;
-  storyLayout: "centered" | "fullscreen" | "padded";
-  ignoreInstance: boolean;
-  name: string;
-  props?: Props;
-  colors?: {
-    [key: string]: string;
-  };
-  images?: {
-    [key: string]: Uint8Array;
-  };
-  dependencies?: {
-    [key: string]: string;
-  };
-  depth?: number;
-  meta?: DomMeta;
-};
-export type Props = {
-  [key: string]: {
-    type: PropType;
-    defaultValue?: string;
-  };
-};
-
-export type PropType = TypeOf | Union | Instance | Native;
-
-type TypeOf = {
-  type: "typeof";
-  typeName: string;
-  propName: string;
-  optional?: boolean;
-};
-
-type Union = {
-  type: "union";
-  types: string[];
-};
-
-type Instance = {
-  type: "INSTANCE";
-};
-
-type Native = {
-  type: "native";
-  value: "string";
-  optional?: boolean;
-};
 
 export async function figmaNodeToDomNode(
   node: SceneNode,

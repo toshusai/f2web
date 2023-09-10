@@ -1,4 +1,5 @@
-import { Props, convertToVariantAvairableName } from "./figmaNodeToDomNode";
+import { Props } from "../types/Props";
+import { convertToVariantAvairableName } from "./figmaNodeToDomNode";
 
 export function variantToProps(node: ComponentSetNode): Props {
   const props: Props = {};

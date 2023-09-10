@@ -1,4 +1,4 @@
-import { AttrValue } from "./AttrValue";
+import { AttrValue } from "../types/AttrValue";
 
 function nodeToMediaQeurys(
   variants: Record<string, AttrValue>,

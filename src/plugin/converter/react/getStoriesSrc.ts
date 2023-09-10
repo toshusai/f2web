@@ -1,4 +1,4 @@
-import { Context } from "../figmaNodeToDomNode";
+import { Context } from "../../types/Context";
 
 export function getStoriesSrc(ctx: Context) {
   const name = ctx.name;

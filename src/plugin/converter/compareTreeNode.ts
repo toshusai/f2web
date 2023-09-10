@@ -1,4 +1,4 @@
-import { DomNode } from "./DomNode";
+import { DomNode } from "../types/DomNode";
 import { isTextDomNode } from "./figmaNodeToDomNode";
 
 export function compareTreeNode(
