@@ -1,3 +1,4 @@
+import { Colors } from "../Colors";
 import { DomMeta } from "./DomMeta";
 import { Props } from "./Props";
 
@@ -7,9 +8,7 @@ export type Context = {
   ignoreInstance: boolean;
   name: string;
   props?: Props;
-  colors?: {
-    [key: string]: string;
-  };
+  colors?: Colors[];
   images?: {
     [key: string]: Uint8Array;
   };

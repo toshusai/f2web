@@ -1,11 +1,9 @@
-import {
-  figmaNodeToDomNode,
-} from "./converter/figmaNodeToDomNode";
+import { figmaNodeToDomNode } from "./converter/figmaNodeToDomNode";
 import { stylesToClassAttrsRecursive } from "./converter/react/stylesToClassAttrsRecursive";
-import { domNodeToHtml } from "./converter/react/domNodeToHtml";
 import { DomNode } from "./types/DomNode";
 import { parseDomName } from "./converter/parseDomName";
-import { createCssVars, colorsToCssVars } from "./initFigmaPlugin";
+import { createCssVars } from "./createCssVars";
+import { domNodeToHtmlCssAll } from "./converter/html-css/domNodeToHtmlCssAll";
 
 export async function postPreviewMessage() {
   const node = figma.currentPage.selection[0];
@@ -25,7 +23,9 @@ export async function postPreviewMessage() {
   domNodes.forEach((x) => {
     stylesToClassAttrsRecursive(x);
   });
-  const html = domNodeToHtml(domNodes[0], 0, true);
+  const colors = createCssVars();
+  ctx.colors = colors;
+  const html = domNodeToHtmlCssAll(domNodes[0], ctx);
 
   ctx.ignoreInstance = false;
   const rawDomNodes = (
@@ -38,18 +38,13 @@ export async function postPreviewMessage() {
     stylesToClassAttrsRecursive(x);
   });
 
-  const { cssVars, colors } = createCssVars();
-  if (colors) {
-    colorsToCssVars(colors, cssVars);
-  }
-  ctx.colors = colors;
   figma.ui.postMessage({
     type: "selection",
     message: {
       domNodes: rawDomNodes,
       html: html,
       ctx: ctx,
-      cssVars,
+      // cssVars,
     },
   });
 }

@@ -6,32 +6,11 @@ import typescript from "highlight.js/lib/languages/typescript";
 import { addMessageEventListener } from "../addMessageEventListener";
 import { getReactSrc } from "../../plugin/converter/react/getReactSrc";
 import { getStoriesSrc } from "../../plugin/converter/react/getStoriesSrc";
-import { convertToCssAvairableName } from "../../plugin/converter/convertToCssAvairableName";
 import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
+import { toCssStyleText } from "../../plugin/converter/html-css/toCssStyleText";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
-
-function cssVarsToCssText(cssVars: any) {
-  let css = "";
-  Object.keys(cssVars).forEach((theme) => {
-    let themeCss = `:root`;
-    if (theme === "__default__") {
-      themeCss += ` {`;
-    } else {
-      themeCss += `[data-theme="${theme}"] {`;
-    }
-
-    Object.keys(cssVars[theme]).forEach((key) => {
-      themeCss += ` --${convertToCssAvairableName(key)}: ${
-        cssVars[theme][key]
-      };`;
-    });
-    themeCss += "}\n";
-    css += themeCss;
-  });
-  return css;
-}
 
 async function post(path: string, body: any) {
   const res = await fetch("http://localhost:3000" + path, {
@@ -50,7 +29,7 @@ export function App() {
   useEffect(() => {
     hljs.registerLanguage("typescript", typescript);
     return addMessageEventListener("selection", (message) => {
-      const { html, ctx, cssVars, domNodes } = message;
+      const { html, ctx, domNodes } = message;
       const preview = document.getElementById("preview");
       if (!preview) return;
 
@@ -67,11 +46,7 @@ export function App() {
       preview.innerHTML = html2;
       const style = document.getElementById("tailwind");
       if (!style) return;
-      style.innerHTML = cssVarsToCssText(cssVars);
-
-      let firstTheme = Object.keys(cssVars)[0];
-      if (!firstTheme) return;
-      preview.setAttribute("data-theme", firstTheme);
+      style.innerHTML = toCssStyleText(ctx.colors);
 
       const codeContent = document.getElementById("code-content");
       if (!codeContent) return;
@@ -82,8 +57,18 @@ export function App() {
       });
       const src = getReactSrc(domNode, ctx);
       const stories = getStoriesSrc(ctx);
-      const colorsCss = cssVarsToCssText(cssVars);
-      const tailwindColors = `export default ${JSON.stringify(ctx.colors)}`;
+      const colorsCss = toCssStyleText(ctx.colors);
+      let tailwindConfigColors = {};
+      Object.keys(ctx.colors).forEach((key) => {
+        tailwindConfigColors[
+          ctx.colors[key].id
+        ] = `var(--${ctx.colors[key].id})`;
+      });
+      const tailwindColors = `export default ${JSON.stringify(
+        tailwindConfigColors,
+        null,
+        2
+      )}`;
       const formatted = prettier.format(src, {
         parser: "typescript",
         plugins: prettierPlugins,
@@ -109,20 +94,6 @@ export function App() {
           },
         },
       };
-
-      requestAnimationFrame(() => {
-        const rect = preview.firstElementChild?.getBoundingClientRect();
-        if (!rect) return;
-        const bodyRect = document.body.getBoundingClientRect();
-        const size = {
-          w: Math.round(rect.width) + 32,
-          h: Math.round(bodyRect.height),
-        };
-        parent.postMessage(
-          { pluginMessage: { type: "resize", size: size } },
-          "*"
-        );
-      });
     });
   }, []);
 
