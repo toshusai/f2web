@@ -34,9 +34,6 @@ export async function postPreviewMessage() {
     )
   ).filter((x) => x !== null) as DomNode[];
   if (!rawDomNodes) return;
-  rawDomNodes.forEach((x) => {
-    stylesToClassAttrsRecursive(x);
-  });
 
   figma.ui.postMessage({
     type: "selection",

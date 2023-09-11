@@ -1,7 +1,7 @@
 import { Properties } from "../../types/Properties";
 
 export function stylesToCss(name: string, props: Partial<Properties>) {
-  let css = `.${name} {\n`;
+  let css = ``;
 
   if (props.alignItems) {
     css += `align-items: ${props.alignItems};\n`;
@@ -140,6 +140,10 @@ export function stylesToCss(name: string, props: Partial<Properties>) {
       css += `width: ${props.width};\n`;
     }
   }
-  css += "}\n";
+  css = css
+    .split("\n")
+    .map((line) => `  ${line}`)
+    .join("\n");
+  css = `.${name} {\n${css}}`;
   return css;
 }
