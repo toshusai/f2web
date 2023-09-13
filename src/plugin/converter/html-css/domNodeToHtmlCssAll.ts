@@ -9,6 +9,7 @@ export function domNodeToHtmlCssAll(node: DomNode, rootCtx: Context) {
   const ctx: HtmlCssContext = {
     id: 0,
     cssClasses: [],
+    isPreview: true,
   };
   const html = domNodeToHtmlCss(node, 0, ctx);
   const css = ctx.cssClasses.join("\n");

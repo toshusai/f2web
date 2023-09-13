@@ -66,16 +66,16 @@ export function App() {
         stylesToClassAttrsRecursive(x);
       });
     }
+    domNodes.forEach((domNode, i) => {
+      if (i === 0) return;
+      compareTreeNode(domNodes[0], domNode, domNode.name);
+    });
+
     const src =
       option === "tailwind"
         ? getReactSrc(domNode, ctx)
         : getReactStyledSrc(domNode, ctx);
 
-        console.log(src)
-    domNodes.forEach((domNode, i) => {
-      if (i === 0) return;
-      compareTreeNode(domNodes[0], domNode, domNode.name);
-    });
     const stories = getStoriesSrc(ctx);
     const colorsCss = toCssStyleText(ctx.colors);
     let tailwindConfigColors = {};
@@ -87,10 +87,11 @@ export function App() {
       null,
       2
     )}`;
-    const formatted = prettier.format(src, {
-      parser: "typescript",
-      plugins: prettierPlugins,
-    });
+    const formatted = src ;
+    // prettier.format(src, {
+    //   parser: "typescript",
+    //   plugins: prettierPlugins,
+    // });
 
     post("/api/v1/create", {
       src: formatted,

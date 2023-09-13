@@ -5,7 +5,8 @@ import { domNodeToHtml } from "./domNodeToHtml";
 export function nodeToTernalyOperator(
   variants: Record<string, DomNode>,
   defaultValue: string,
-  ignoreInstance
+  ignoreInstance,
+  node: DomNode
 ) {
   const keys = Object.keys(variants);
   if (keys.length === 0) {
@@ -17,6 +18,9 @@ export function nodeToTernalyOperator(
   }
   const value = keys[0].split("=")[1];
   const variantValue = variants[keys[0]];
+  if (node.type === variantValue.type) {
+    return defaultValue;
+  }
   return `props.${convertToVariantAvairableName(
     key
   )} === "${value}" ? ${domNodeToHtml(
@@ -27,6 +31,7 @@ export function nodeToTernalyOperator(
   )} : ${nodeToTernalyOperator(
     Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
     defaultValue,
-    ignoreInstance
+    ignoreInstance,
+    node
   )}`;
 }

@@ -1,6 +1,7 @@
 import { Properties } from "../../types/Properties";
 
-export function stylesToCss(name: string, props: Partial<Properties>) {
+
+export function stylesToCssString(props: Partial<Properties>) {
   let css = ``;
   let before = ``;
 
@@ -28,7 +29,11 @@ export function stylesToCss(name: string, props: Partial<Properties>) {
     before += `border-bottom-width: ${props.borderBottomWidth}px;\n`;
   }
   if (props.borderColor) {
-    before += `border-color: ${props.borderColor};\n`;
+    if (props.borderColor.startsWith("#")) {
+      before += `border-color: ${props.borderColor};\n`;
+    } else {
+      before += `border-color: var(--${props.borderColor});\n`;
+    }
   }
   if (props.borderLeftWidth) {
     before += `border-left-width: ${props.borderLeftWidth}px;\n`;
@@ -142,15 +147,13 @@ export function stylesToCss(name: string, props: Partial<Properties>) {
     } else if (props.width === "full") {
       css += `width: 100%;\n`;
     } else {
-      css += `width: ${props.width};\n`;
+      css += `width: ${props.width}px;\n`;
     }
   }
-  if (
-    props.borderBottomWidth ||
+  if (props.borderBottomWidth ||
     props.borderLeftWidth ||
     props.borderRightWidth ||
-    props.borderTopWidth
-  ) {
+    props.borderTopWidth) {
     before += `content: "";\n`;
     before += `position: absolute;\n`;
     before += `width: 100%;\n`;
@@ -158,13 +161,8 @@ export function stylesToCss(name: string, props: Partial<Properties>) {
     before += `inset: 0;\n`;
   }
 
-  css = css
-    .split("\n")
-    .map((line) => `  ${line}`)
-    .join("\n");
-  css = `.${name} {\n${css}}`;
-  if (before) {
-    css = `.${name}::before {\n${before}}\n${css}`;
-  }
-  return css;
+  return {
+    css,
+    before,
+  };
 }

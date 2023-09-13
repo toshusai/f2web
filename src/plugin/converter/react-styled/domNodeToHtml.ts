@@ -1,12 +1,19 @@
-import { isTextDomNode } from "../figmaNodeToDomNode";
+import {
+  convertToVariantAvairableName,
+  isTextDomNode,
+} from "../figmaNodeToDomNode";
 import { DomNode } from "../../types/DomNode";
-import { variantsToTernaryOperator } from "../react/variantsToTernaryOperator";
 import { nodeToTernalyOperator } from "../react/nodeToTernalyOperator";
 import { toPascalCase } from "js-convert-case";
 import { Context } from "../../types/Context";
 import { contextPropsToReactPropsString } from "../react/contextPropsToReactPropsString";
-import { Properties } from "../../types/Properties";
-import { stylesToCss } from "../html-css/stylesToCss";
+import {
+  createStyledHeader,
+  stylesToStyledCss,
+  toInner,
+} from "./stylesToStyledCss";
+import { stylesToCssString } from "./stylesToCssString";
+import { variantsToTernaryOperator } from "../react/variantsToTernaryOperator";
 
 export type ReactStyledContext = {
   id: number;
@@ -54,25 +61,31 @@ ${rootCtx.cssClasses.join("\n")}
 `;
 }
 
-export function stylesToStyledCss(
-  className: string,
-  styles: Partial<Properties>,
-  domName = "div"
+export function variantsToTernaryOperatorStyled(
+  variants: Record<string, DomNode>,
+  defaultValue: string
 ) {
-  const css = stylesToCss(className, styles);
-  const split = css.split("\n");
-  split.splice(0, 1);
-  split.splice(split.length - 1, 1);
-  return `const ${className} = styled${
-    !isFistLetterUpperCase(domName) ? `.${domName}` : `(${domName})`
-  }\`
-${split.join("\n")}
-\`;
-`;
-}
+  const keys = Object.keys(variants);
+  if (keys.length === 0) {
+    return defaultValue;
+  }
 
-function isFistLetterUpperCase(str: string) {
-  return str[0].toUpperCase() === str[0];
+  const key = keys[0].split("=")[0];
+  const value = keys[0].split("=")[1];
+  const variantValue = variants[keys[0]];
+  if (isTextDomNode(variantValue))
+    throw new Error("variant value should be node");
+  const styles = variantValue.styles;
+  if (!styles) return defaultValue;
+  const cssObj = toInner(styles);
+  return `\${({$${convertToVariantAvairableName(
+    key
+  )}}) => $${convertToVariantAvairableName(key)} === "${value}" ? \`${
+    cssObj.css + cssObj.before
+  }\` : ${variantsToTernaryOperatorStyled(
+    Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+    defaultValue
+  )}}`;
 }
 
 export function domNodeToReactStyledString(
@@ -80,7 +93,7 @@ export function domNodeToReactStyledString(
   depth = 0,
   ignoreInstance = false,
   className = false,
-  root = true,
+  _= true,
   ctx: ReactStyledContext
 ): string {
   const indent = "  ".repeat(depth);
@@ -93,7 +106,7 @@ export function domNodeToReactStyledString(
     }
   }
 
-  const attrs = Object.entries(node.attrs ?? {})
+  let attrs = Object.entries(node.attrs ?? {})
     .map(([key, value]) => {
       if (value.variants) {
         return `${key}={${variantsToTernaryOperator(
@@ -120,6 +133,20 @@ export function domNodeToReactStyledString(
   const tag = `Styled${toPascalCase(node.type)}${ctx.id}`;
   if (node.styles) {
     let css = stylesToStyledCss(tag, node.styles, node.type);
+    if (node.variants) {
+      const obj = toInner(node.styles);
+      css = `${variantsToTernaryOperatorStyled(
+        node.variants,
+        `\`${obj.css + obj.before}\``
+      )}`;
+      css = createStyledHeader(tag, node.type, css, "any");
+
+      Object.keys(node.variants).forEach((key) => {
+        const k = key.split("=")[0];
+        const keyName = convertToVariantAvairableName(k);
+        attrs += ` $${keyName}={props.${keyName}}`;
+      });
+    }
 
     ctx.cssClasses.push(css);
   }
@@ -153,12 +180,12 @@ export function domNodeToReactStyledString(
     }
   }
 
-  if (node.variants) {
-    tagJsx = `${indent}{${nodeToTernalyOperator(
-      node.variants,
-      tagJsx,
-      ignoreInstance
-    ).replace(/\n/g, "")}}\n`;
-  }
+  // if (node.variants) {
+  //   tagJsx = `${indent}{${nodeToTernalyOperator(
+  //     node.variants,
+  //     tagJsx,
+  //     ignoreInstance
+  //   ).replace(/\n/g, "")}}\n`;
+  // }
   return tagJsx;
 }

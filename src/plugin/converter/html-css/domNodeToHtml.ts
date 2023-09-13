@@ -22,7 +22,7 @@ export function domNodeToHtmlCss(
     ctx.cssClasses.push(stylesToCss(`_${ctx.id}`, node.styles ?? {}));
   }
 
-  const attrs = Object.entries({
+  let attrs = Object.entries({
     ...node.attrs,
     class: {
       type: "value",
@@ -45,8 +45,16 @@ export function domNodeToHtmlCss(
     ?.map((x) => domNodeToHtmlCss(x, depth + 1, ctx))
     .join("");
 
-  if (node.name === "img") {
-    return `${indent}<${node.name} ${attrs.join(" ")} />\n`;
+  if (node.type === "img") {
+    if (ctx.isPreview) {
+      attrs = attrs.map((x) => {
+        if (x.startsWith("src=")) {
+          return `src="https://via.placeholder.com/150"`;
+        }
+        return x;
+      });
+    }
+    return `${indent}<${node.type} ${attrs.join(" ")} />\n`;
   }
 
   const tagName = node.type;

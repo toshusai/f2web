@@ -85,11 +85,10 @@ export function domNodeToHtml(
   }
 
   if (node.variants) {
-    tagJsx = `${indent}{${nodeToTernalyOperator(
-      node.variants,
-      tagJsx,
-      ignoreInstance
-    ).replace(/\n/g, "")}}\n`;
+    let op = nodeToTernalyOperator(node.variants, tagJsx, ignoreInstance, node);
+    if (op !== tagJsx) {
+      tagJsx = `${indent}{${op.replace(/\n/g, "")}}\n`;
+    }
   }
   return tagJsx;
 }

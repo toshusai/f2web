@@ -49,6 +49,18 @@ export function compareTreeNode(
     }
   }
 
+  if ("styles" in defaultNode && "styles" in variableNode) {
+    if (defaultNode.styles && variableNode.styles) {
+      if (
+        JSON.stringify(defaultNode.styles) !==
+        JSON.stringify(variableNode.styles)
+      ) {
+        defaultNode.variants = defaultNode.variants ?? {};
+        defaultNode.variants[modeName] = variableNode;
+      }
+    }
+  }
+
   if ("children" in defaultNode && "children" in variableNode) {
     if (!defaultNode.children) throw new Error("defaultNode.children is null");
     if (!variableNode.children)

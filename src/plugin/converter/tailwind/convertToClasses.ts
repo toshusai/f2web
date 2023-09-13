@@ -231,10 +231,6 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
           if (!id) throw new Error("id is null");
           if (!color) throw new Error("color is null");
           const name = convertToCssAvairableName(color.id);
-          if (!ctx.colors) ctx.colors = {};
-          if (color?.resolvedType === "COLOR") {
-            ctx.colors[name] = color.id;
-          }
           classes.push(`before:border-${name}`);
         } else {
           const hex = colorToHex(stroke.color, stroke.opacity ?? 1);
@@ -306,9 +302,7 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
   // color
   if (node.fillStyleId) {
     if (isMixed(node.fillStyleId)) throw new Error("isMixed fillStyleId");
-    ctx.colors = ctx.colors ?? {};
     const name = convertToCssAvairableName(node.fillStyleId);
-    ctx.colors[name] = node.fillStyleId;
     const color = figma.getStyleById(node.fillStyleId);
     if (!color) throw new Error("color is null");
     if (color.type === "PAINT") {
@@ -338,10 +332,6 @@ export async function convertToClasses(node: SceneNode, ctx: Context) {
           if (!id) throw new Error("id is null");
           if (!color) throw new Error("color is null");
           const name = convertToCssAvairableName(color.id);
-          if (!ctx.colors) ctx.colors = {};
-          if (color?.resolvedType === "COLOR") {
-            ctx.colors[name] = color.id;
-          }
           if (node.type === "TEXT" || node.type === "VECTOR") {
             classes.push(`text-${name}`);
           } else {
