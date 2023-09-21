@@ -1,4 +1,4 @@
-@import "./colors.css";
+@import "./src/stories/global.css";
 
 @tailwind base;
 @tailwind components;

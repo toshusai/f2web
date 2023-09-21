@@ -19,10 +19,9 @@ export function variantsToTernaryOperator(
   const variantValue = variants[keys[0]].value;
 
   let final = defaultValue.replace(/"/g, "").split(" ");
-  if (key.startsWith("@")) {
+  if (key.startsWith("media")) {
     const variantClasses = variantValue.split(" ");
 
-    // const plusDiff = variantClasses.filter((x) => !final.includes(x));
     const minusDiff = final.filter((x) => !variantClasses.includes(x));
     minusDiff.forEach((x) => {
       if (x === "hidden") {
@@ -30,8 +29,13 @@ export function variantsToTernaryOperator(
       }
     });
 
+    const split = value.split(": ")
+    const minMax = split[0].split("-")[0];
+    const px = split[1].split("px")[0];
+
     final = [
       ...final,
+      variantClasses.map((x) => `${minMax}-[${px}px]:${x}`),
       ...variantsToTernaryOperator(
         Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
         defaultValue.replace(/"/g, ""),
@@ -41,6 +45,7 @@ export function variantsToTernaryOperator(
 
     return `"${final.join(" ")}"`;
   }
+  
   return `props.${convertToVariantAvairableName(
     key
   )} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(

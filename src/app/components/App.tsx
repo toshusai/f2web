@@ -9,7 +9,7 @@ import { getStoriesSrc } from "../../plugin/converter/react/getStoriesSrc";
 import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
 import { toCssStyleText } from "../../plugin/converter/html-css/toCssStyleText";
 import { stylesToClassAttrsRecursive } from "../../plugin/converter/react/stylesToClassAttrsRecursive";
-import { getReactStyledSrc } from "../../plugin/converter/react-styled/domNodeToHtml";
+import { getReactStyledSrc } from "../../plugin/converter/react-styled/getReactStyledSrc";
 
 declare const prettierPlugins: any;
 declare const prettier: any;
@@ -38,7 +38,7 @@ export function App() {
     update(message, e.target.value as any);
   };
 
-  function update(message: string, option: "tailwind" | "styled" = "tailwind") {
+  async function update(message: string, option: "tailwind" | "styled" = "tailwind") {
     const { html, ctx, domNodes } = JSON.parse(message);
     const preview = document.getElementById("preview");
     if (!preview) return;
@@ -87,13 +87,11 @@ export function App() {
       null,
       2
     )}`;
-    const formatted = src ;
-    // prettier.format(src, {
-    //   parser: "typescript",
-    //   plugins: prettierPlugins,
-    // });
-
-    post("/api/v1/create", {
+    const formatted = prettier.format(src, {
+      parser: "typescript",
+      plugins: prettierPlugins,
+    });
+     post("/api/v1/create", {
       src: formatted,
       name: ctx.name,
       stories: prettier.format(stories, {

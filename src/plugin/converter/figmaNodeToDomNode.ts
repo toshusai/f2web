@@ -20,6 +20,7 @@ export async function figmaNodeToDomNode(
   if (!ctx.depth) ctx.depth = 0;
 
   let attrs: Record<string, AttrValue> = {};
+  let variants: Record<string, DomNode> | undefined = undefined;
   const styles = await convertToCssProperties(node, ctx);
   if (!styles) return null;
   if (node.parent?.type === "COMPONENT_SET") {
@@ -79,6 +80,23 @@ export async function figmaNodeToDomNode(
   }
 
   if (!supportedNodes(node)) return null;
+  if (node.componentPropertyReferences?.visible) {
+    ctx.props = ctx.props ?? {};
+    ctx.props[convertToVariantAvairableName("visible")] = {
+      type: {
+        type: "native",
+        value: "boolean",
+      },
+      defaultValue: "true",
+    };
+
+    variants ??= {};
+    variants[`${convertToVariantAvairableName("visible")}=false`] = {
+      type: "NULL",
+      attrs: {},
+      children: [],
+    };
+  }
   if (!node.visible) {
     styles.display = "hidden";
   }
@@ -112,6 +130,7 @@ export async function figmaNodeToDomNode(
     return {
       type: name,
       name: node.name,
+      variants,
       attrs,
       styles: styles,
       children: children,
@@ -123,6 +142,7 @@ export async function figmaNodeToDomNode(
     if (r.type !== "text" && "attrs" in r) {
       return {
         ...r,
+        variants,
         styles,
       };
     }
@@ -133,6 +153,7 @@ export async function figmaNodeToDomNode(
     const textNode = handleTextNode(node, ctx);
     if (isTextDomNode(textNode)) return null;
     textNode.styles = styles;
+    textNode.variants = variants;
     return textNode;
   }
   return null;

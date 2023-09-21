@@ -21,6 +21,6 @@ type Instance = {
 };
 type Native = {
   type: "native";
-  value: "string";
+  value: "string" | "boolean";
   optional?: boolean;
 };

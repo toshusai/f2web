@@ -162,7 +162,7 @@ export function stylesToCssString(props: Partial<Properties>) {
   }
 
   return {
-    css,
-    before,
+    css: css.trimEnd(),
+    before: before.trimEnd(),
   };
 }

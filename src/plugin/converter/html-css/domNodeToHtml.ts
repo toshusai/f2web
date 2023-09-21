@@ -3,6 +3,36 @@ import { isTextDomNode } from "../figmaNodeToDomNode";
 import { HtmlCssContext } from "./HtmlCssContext";
 import { stylesToCss } from "./stylesToCss";
 
+function handleVariantStlye(
+  variants: Record<string, DomNode>,
+  defaultValue: string,
+  ctx: HtmlCssContext
+) {
+  const keys = Object.keys(variants);
+  if (keys.length === 0) {
+    return defaultValue;
+  }
+  const key = keys[0].split("=")[0];
+  if (key.startsWith("media")) {
+    const value = keys[0].split("=")[1];
+    const variantValue = variants[keys[0]];
+    if (isTextDomNode(variantValue))
+      throw new Error("variant value should be node");
+    if (variantValue.styles) {
+      const media = `@media screen and (${value}) {\n${stylesToCss(
+        `_${ctx.id}`,
+        variantValue.styles
+      )}}`;
+      ctx.cssClasses.push(media);
+    }
+    return handleVariantStlye(
+      Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
+      defaultValue,
+      ctx
+    );
+  }
+}
+
 export function domNodeToHtmlCss(
   node: DomNode,
   depth = 0,
@@ -20,6 +50,9 @@ export function domNodeToHtmlCss(
   ctx.id++;
   if (node.styles) {
     ctx.cssClasses.push(stylesToCss(`_${ctx.id}`, node.styles ?? {}));
+  }
+  if (node.variants) {
+    handleVariantStlye(node.variants, "", ctx);
   }
 
   let attrs = Object.entries({

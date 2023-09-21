@@ -4,7 +4,7 @@ import { contextPropsToReactPropsString } from "./contextPropsToReactPropsString
 import { Context } from "../../types/Context";
 
 export function getReactSrc(node: DomNode, ctx: Context) {
-  const jsx = domNodeToHtml(node, 2, false, true);
+  const jsx = domNodeToHtml(node, 2, false, true, false, ctx);
 
   return `import React from "react";
 ${Object.keys(ctx.dependencies ?? {})

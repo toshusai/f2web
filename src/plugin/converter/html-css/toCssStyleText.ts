@@ -1,4 +1,5 @@
 import { Colors } from "../../Colors";
+export const DEFAULT_MODE = "__default__";
 
 export function toCssStyleText(colors: Colors[]) {
   const modeMap: Record<string, Colors[]> = {};
@@ -9,7 +10,7 @@ export function toCssStyleText(colors: Colors[]) {
 
   let allCss = "";
   Object.entries(modeMap).forEach(([mode, colors]) => {
-    if (mode === "__default__") {
+    if (mode === DEFAULT_MODE) {
       allCss += `:root {\n`;
     } else {
       allCss += `:root[data-theme="${mode}"] {\n`;

@@ -4,6 +4,7 @@ import { isMixed } from "../utils/isMixed";
 import { convertToCssAvairableName } from "./convertToCssAvairableName";
 import { Context } from "../types/Context";
 import { Properties } from "../types/Properties";
+import { DEFAULT_MODE } from "./html-css/toCssStyleText";
 
 export async function convertToCssProperties(node: SceneNode, ctx: Context) {
   if (!supportedNodes(node)) return null;
@@ -299,8 +300,18 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
           // throw new Error(`unsupported GRADIENT_LINEAR`);
           props.backgroundColor =
             "linear-gradient(to right bottom, #000000, #ffffff)";
-        } else {
-          props.backgroundColor = name;
+        } else if (paint.type === "SOLID") {
+          if (node.type === "TEXT") {
+            props.color = name;
+          } else {
+            props.backgroundColor = name;
+          }
+          ctx.colors?.push({
+            id: name,
+            name,
+            value: colorToHex(paint.color, paint.opacity ?? 1),
+            mode: DEFAULT_MODE,
+          });
         }
       }
     }

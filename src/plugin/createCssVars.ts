@@ -1,6 +1,7 @@
 import { colorToHex } from "./utils/colorToHex";
 import { convertToCssAvairableName } from "./converter/convertToCssAvairableName";
 import { Colors } from "./Colors";
+import { DEFAULT_MODE } from "./converter/html-css/toCssStyleText";
 
 export function createCssVars() {
   const colors = figma.variables.getLocalVariables("COLOR");
@@ -19,13 +20,13 @@ export function createCssVars() {
 
     if (p.type === "SOLID") {
       color.value = colorToHex(p.color, p.opacity ?? 1);
-      color.mode = "__default__";
+      color.mode = DEFAULT_MODE;
       allColors.push(color);
     } else if (p.type === "GRADIENT_LINEAR") {
       color.value = `linear-gradient(45deg, ${p.gradientStops
         .map((stop) => `${colorToHex(stop.color, 1)} ${stop.position * 100}%`)
         .join(", ")})`;
-      color.mode = "__default__";
+      color.mode = DEFAULT_MODE;
       allColors.push(color);
     }
   });
@@ -45,7 +46,7 @@ export function createCssVars() {
       };
       let name = mode.name;
       if (i === 0) {
-        name = "__default__";
+        name = DEFAULT_MODE;
       }
       color.mode = name;
       const value = variable.valuesByMode[mode.modeId] as RGBA;

@@ -3,97 +3,29 @@ import {
   isTextDomNode,
 } from "../figmaNodeToDomNode";
 import { DomNode } from "../../types/DomNode";
-import { nodeToTernalyOperator } from "../react/nodeToTernalyOperator";
 import { toPascalCase } from "js-convert-case";
 import { Context } from "../../types/Context";
-import { contextPropsToReactPropsString } from "../react/contextPropsToReactPropsString";
 import {
   createStyledHeader,
   stylesToStyledCss,
   toInner,
 } from "./stylesToStyledCss";
-import { stylesToCssString } from "./stylesToCssString";
 import { variantsToTernaryOperator } from "../react/variantsToTernaryOperator";
+import { variantsToTernaryOperatorStyled } from "./variantsToTernaryOperatorStyled";
+import { nodeToTernalyOperator } from "./nodeToTernalyOperator";
 
 export type ReactStyledContext = {
   id: number;
   cssClasses: string[];
+  codeGenCtx: Context;
 };
-
-export function getReactStyledSrc(node: DomNode, ctx: Context) {
-  const rootCtx: ReactStyledContext = {
-    id: 0,
-    cssClasses: [],
-  };
-  const styledJsx = domNodeToReactStyledString(
-    node,
-    0,
-    false,
-    false,
-    true,
-    rootCtx
-  );
-  return `import React from "react";
-import styled from "styled-components";
-${Object.keys(ctx.dependencies ?? {})
-  .filter((key) => styledJsx.includes(`<Styled${key}`))
-  .map((key) => {
-    return `import { ${key} } from "../${key}";\n`;
-  })
-  .join("")}
-export function ${ctx.name}(${contextPropsToReactPropsString({
-    ...ctx.props,
-    className: {
-      type: {
-        type: "native",
-        value: "string",
-        optional: true,
-      },
-      defaultValue: '""',
-    },
-  })}) {
-  return (
-${styledJsx}  
-)
-}
-
-${rootCtx.cssClasses.join("\n")}
-`;
-}
-
-export function variantsToTernaryOperatorStyled(
-  variants: Record<string, DomNode>,
-  defaultValue: string
-) {
-  const keys = Object.keys(variants);
-  if (keys.length === 0) {
-    return defaultValue;
-  }
-
-  const key = keys[0].split("=")[0];
-  const value = keys[0].split("=")[1];
-  const variantValue = variants[keys[0]];
-  if (isTextDomNode(variantValue))
-    throw new Error("variant value should be node");
-  const styles = variantValue.styles;
-  if (!styles) return defaultValue;
-  const cssObj = toInner(styles);
-  return `\${({$${convertToVariantAvairableName(
-    key
-  )}}) => $${convertToVariantAvairableName(key)} === "${value}" ? \`${
-    cssObj.css + cssObj.before
-  }\` : ${variantsToTernaryOperatorStyled(
-    Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
-    defaultValue
-  )}}`;
-}
 
 export function domNodeToReactStyledString(
   node: DomNode,
   depth = 0,
   ignoreInstance = false,
   className = false,
-  _= true,
+  _ = true,
   ctx: ReactStyledContext
 ): string {
   const indent = "  ".repeat(depth);
@@ -130,22 +62,31 @@ export function domNodeToReactStyledString(
     .replace(/ +/g, " ");
 
   let tagJsx = "";
+  if (node.type === "NULL") {
+    return "null";
+  }
+
   const tag = `Styled${toPascalCase(node.type)}${ctx.id}`;
   if (node.styles) {
     let css = stylesToStyledCss(tag, node.styles, node.type);
     if (node.variants) {
       const obj = toInner(node.styles);
-      css = `${variantsToTernaryOperatorStyled(
+      const inner = variantsToTernaryOperatorStyled(
         node.variants,
-        `\`${obj.css + obj.before}\``
-      )}`;
-      css = createStyledHeader(tag, node.type, css, "any");
+        `${obj.css + obj.before}`
+      );
+      if (inner !== false) {
+        css = `${inner}`;
+        css = createStyledHeader(tag, node.type, css, "any");
 
-      Object.keys(node.variants).forEach((key) => {
-        const k = key.split("=")[0];
-        const keyName = convertToVariantAvairableName(k);
-        attrs += ` $${keyName}={props.${keyName}}`;
-      });
+        Object.keys(node.variants).forEach((key) => {
+          const k = key.split("=")[0];
+          if (k.startsWith("media")) return;
+          const keyName = convertToVariantAvairableName(k);
+          attrs += ` $${keyName}={props.${keyName}}`;
+        });
+      }
+    }else{
     }
 
     ctx.cssClasses.push(css);
@@ -180,12 +121,17 @@ export function domNodeToReactStyledString(
     }
   }
 
-  // if (node.variants) {
-  //   tagJsx = `${indent}{${nodeToTernalyOperator(
-  //     node.variants,
-  //     tagJsx,
-  //     ignoreInstance
-  //   ).replace(/\n/g, "")}}\n`;
-  // }
+  if (node.variants) {
+    const inner = nodeToTernalyOperator(
+      node.variants,
+      tagJsx,
+      ignoreInstance,
+      node,
+      ctx
+    )
+    if (inner !== false && inner !== tagJsx) {
+      tagJsx = `${indent}{${inner.replace(/\n/g, "")}}\n`;
+    }
+  }
   return tagJsx;
 }

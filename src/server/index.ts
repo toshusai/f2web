@@ -1,5 +1,7 @@
 import express from "express";
 import fs from "fs";
+import { config } from "dotenv";
+config()
 
 const app = express();
 
@@ -12,7 +14,6 @@ app.use((_, res, next) => {
   next();
 });
 
-const DIR = "/Users/notnull/Develop/shu-web-dev/src";
 
 app.post("/api/v1/create", (req, res) => {
   const src = req.body.src;
@@ -20,14 +21,15 @@ app.post("/api/v1/create", (req, res) => {
   const stories = req.body.stories;
   const colorsCss = req.body.colorsCss;
   const tailwindColors = req.body.tailwindColors;
-  fs.mkdirSync(`${DIR}/components/react/${name}`, { recursive: true });
-  fs.writeFileSync(`${DIR}/components/react/${name}/index.tsx`, src);
+  const dir = process.env.TARGET_DIR;
+  fs.mkdirSync(`${dir}/components/react/${name}`, { recursive: true });
+  fs.writeFileSync(`${dir}/components/react/${name}/index.tsx`, src);
   fs.writeFileSync(
-    `${DIR}/components/react/${name}/index.stories.tsx`,
+    `${dir}/components/react/${name}/index.stories.tsx`,
     stories
   );
-  fs.writeFileSync(`${DIR}/global.css`, colorsCss);
-  fs.writeFileSync(`${DIR}/colors.js`, tailwindColors);
+  fs.writeFileSync(`${dir}/global.css`, colorsCss);
+  fs.writeFileSync(`${dir}/colors.js`, tailwindColors);
   res.send({
     status: "ok",
   });

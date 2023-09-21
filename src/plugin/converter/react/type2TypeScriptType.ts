@@ -3,7 +3,7 @@ import { PropType } from "../../types/Props";
 export function type2TypeScriptType(type: PropType) {
   let result = "";
   if (type.type === "native") {
-    result = "string";
+    result = type.value
   } else if (type.type === "INSTANCE") {
     result = "React.ReactNode";
   } else if (type.type === "union") {

@@ -25,7 +25,7 @@ export const Basic: Story = {
         if (type.type === "native") {
           return `${key}: "${ctx.props[key].defaultValue}"`;
         } else if (type.type === "INSTANCE") {
-          return `${key}: <div className="rounded-[4px] bg-gradient-to-br from-red-500 to-blue-500 p-[8px] text-white">props.${key}</div>`;
+          return `${key}: <div>props.${key}</div>`;
         } else if (type.type === "union") {
           const defaultValue = ctx.props[key].defaultValue;
           if (!defaultValue) return "";

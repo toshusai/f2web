@@ -8,7 +8,8 @@ export function domNodeToHtml(
   depth = 0,
   ignoreInstance = false,
   className = false,
-  root = true
+  root = true,
+  ctx
 ): string {
   const indent = "  ".repeat(depth);
   if (isTextDomNode(node)) {
@@ -62,6 +63,9 @@ export function domNodeToHtml(
     .replace(/ +/g, " ");
 
   let tagJsx = "";
+  if (node.type === "NULL") {
+    return "null";
+  }
   if (node.children === undefined) {
     tagJsx = `${indent}<${node.type} ${attrs} />\n`;
     if (node.type === "NULL") {
@@ -74,7 +78,7 @@ export function domNodeToHtml(
   } else {
     const children = node.children
       ?.map((child) =>
-        domNodeToHtml(child, depth + 1, ignoreInstance, className, false)
+        domNodeToHtml(child, depth + 1, ignoreInstance, className, false, ctx)
       )
       .join("");
     if (node.type === "img") {
@@ -85,7 +89,13 @@ export function domNodeToHtml(
   }
 
   if (node.variants) {
-    let op = nodeToTernalyOperator(node.variants, tagJsx, ignoreInstance, node);
+    let op = nodeToTernalyOperator(
+      node.variants,
+      tagJsx,
+      ignoreInstance,
+      node,
+      ctx
+    );
     if (op !== tagJsx) {
       tagJsx = `${indent}{${op.replace(/\n/g, "")}}\n`;
     }
