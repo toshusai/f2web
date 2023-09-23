@@ -1,4 +1,4 @@
-import { postPreviewMessage } from "./postPreviewMessage";
+import { postPreviewMessage, postSelectMessage } from "./postPreviewMessage";
 
 export function initFigmaPlugin() {
   if (typeof figma !== "undefined") {
@@ -9,12 +9,15 @@ export function initFigmaPlugin() {
         figma.ui.resize(msg.size.w, msg.size.h);
         figma.clientStorage.setAsync("size", msg.size).catch(() => {});
       }
+      if(msg.type === 'generate') {
+        postPreviewMessage();
+      }
     });
     figma.on("selectionchange", async () => {
-      await postPreviewMessage();
+      await postSelectMessage();
     });
     figma.on("run", async () => {
-      await postPreviewMessage();
+      await postSelectMessage();
     });
     figma.on("documentchange", () => {});
   }

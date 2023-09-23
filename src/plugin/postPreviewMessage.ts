@@ -9,6 +9,25 @@ import { createCssVars } from "./createCssVars";
 import { domNodeToHtmlCssAll } from "./converter/html-css/domNodeToHtmlCssAll";
 import { compareTreeNode } from "./converter/compareTreeNode";
 
+export function postSelectMessage() {
+  const node = figma.currentPage.selection[0];
+  if (!node) {
+    figma.ui.postMessage({
+      type: "selection",
+      message: {
+        type: null,
+      },
+    });
+  } else {
+    figma.ui.postMessage({
+      type: "selection",
+      message: {
+        type: node.type,
+      },
+    });
+  }
+}
+
 export async function postPreviewMessage() {
   const node = figma.currentPage.selection[0];
   if (!node) return;
@@ -33,7 +52,7 @@ export async function postPreviewMessage() {
   domNodes.forEach((domNode, i) => {
     if (i === 0) return;
     if (isTextDomNode(domNode)) return;
-    compareTreeNode(domNodes[0], domNode, domNode.name ?? '');
+    compareTreeNode(domNodes[0], domNode, domNode.name ?? "");
   });
   const html = domNodeToHtmlCssAll(domNodes[0], ctx);
 
@@ -46,7 +65,7 @@ export async function postPreviewMessage() {
   if (!rawDomNodes) return;
 
   figma.ui.postMessage({
-    type: "selection",
+    type: "generate",
     message: {
       domNodes: rawDomNodes,
       html: html,
