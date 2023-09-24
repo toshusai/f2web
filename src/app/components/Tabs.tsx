@@ -8,7 +8,7 @@ export function Tabs(props: {
   onClick: (value: string) => void;
 }) {
   return (
-    <div className="flex flex-row gap-[8px]">
+    <div className="tabs">
       {props.items.map((x) => (
         <Tab
           key={x.value}

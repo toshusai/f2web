@@ -6,9 +6,29 @@ import { Context } from "../types/Context";
 import { Properties } from "../types/Properties";
 import { DEFAULT_MODE } from "./html-css/toCssStyleText";
 
+type ErrorInfo = {
+  name: string;
+  context: string;
+  where: string;
+};
+
+class UnsupportedError extends Error {
+  constructor(info: ErrorInfo) {
+    super(JSON.stringify(info));
+  }
+}
+
+class UnexpectedError extends Error {
+  constructor(info: ErrorInfo) {
+    super(JSON.stringify(info));
+  }
+}
+
 export async function convertToCssProperties(node: SceneNode, ctx: Context) {
   if (!supportedNodes(node)) return null;
   const props: Partial<Properties> = {};
+
+  props.boxSizing = "border-box";
 
   // height
   if (node.layoutSizingVertical === "HUG") {
@@ -61,10 +81,29 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       if (typeof node.lineHeight === "number") {
         props.lineHeight = node.lineHeight;
       }
-      if (isMixed(node.lineHeight)) throw new Error("isMixed lineHeight");
-      if (isMixed(node.fontSize)) throw new Error("isMixed fontSize");
-      const h = Math.round(node.fontSize * 1.2);
-      props.lineHeight = h;
+      if (!isMixed(node.lineHeight)) {
+        if (node.lineHeight.unit === "PIXELS") {
+          props.lineHeight = node.lineHeight.value;
+        } else if (node.lineHeight.unit === "AUTO") {
+          if (isMixed(node.fontSize)) {
+            throw new UnsupportedError({
+              name: "fontSize is figma.mixed",
+              context: "convertToCssProperties",
+              where: node.name,
+            });
+          }
+          const h = Math.round(node.fontSize * 1.2);
+          props.lineHeight = h;
+        }
+      } else {
+        if (isMixed(node.lineHeight)) {
+          throw new UnsupportedError({
+            name: "lineHeight is figma.mixed",
+            context: "convertToCssProperties",
+            where: node.name,
+          });
+        }
+      }
     }
 
     if (node.fontWeight) {
@@ -74,9 +113,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
     }
 
     if (node.fontName) {
-      if (isMixed(node.fontName)) throw new Error("isMixed");
-      // TODO implement
-      // classes.push(`font-${node.fontName.family}`);
+      if (isMixed(node.fontName)) {
+        throw new UnsupportedError({
+          name: "fontName is figma.mixed",
+          context: "convertToCssProperties",
+          where: node.name,
+        });
+      }
     }
   } else {
     // position
@@ -222,7 +265,11 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
 
     // border
     if (isMixed(node.strokes)) {
-      throw new Error("isMixed strokes");
+      throw new UnsupportedError({
+        name: "strokes is figma.mixed",
+        context: "convertToCssProperties",
+        where: node.name,
+      });
     }
 
     if (node.strokes.length === 1) {
@@ -231,8 +278,14 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
         if (stroke.boundVariables?.color) {
           const id = stroke.boundVariables.color.id;
           const color = figma.variables.getVariableById(id);
-          if (!id) throw new Error("id is null");
-          if (!color) throw new Error("color is null");
+
+          if (!color) {
+            throw new UnexpectedError({
+              name: "figma.variables.getVariableById(id) is null",
+              context: "convertToCssProperties, strokes",
+              where: `nodeName: ${node.name}, variableId: ${id}`,
+            });
+          }
           const name = convertToCssAvairableName(color.id);
 
           props.borderColor = name;
@@ -250,7 +303,11 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       }
 
       if (node.strokeAlign !== "INSIDE") {
-        throw new Error("strokeAlign !== 'INSIDE'");
+        throw new UnsupportedError({
+          name: "strokeAlign only support INSIDE",
+          context: "convertToCssProperties",
+          where: node.name,
+        });
       }
 
       if (node.type !== "VECTOR") {
@@ -271,7 +328,11 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
 
     // shadow
     if (isMixed(node.effects)) {
-      throw new Error("isMixed effects");
+      throw new UnsupportedError({
+        name: "effects is figma.mixed",
+        context: "convertToCssProperties",
+        where: node.name,
+      });
     }
     if (node.effects.length === 1) {
       const effect = node.effects[0];
@@ -290,16 +351,26 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
     if (isMixed(node.fillStyleId)) throw new Error("isMixed fillStyleId");
     const name = convertToCssAvairableName(node.fillStyleId);
     const color = figma.getStyleById(node.fillStyleId);
-    if (!color) throw new Error("color is null");
+    if (!color) {
+      throw new UnexpectedError({
+        name: "figma.getStyleById(node.fillStyleId) is null",
+        context: "convertToCssProperties, fillStyleId",
+        where: `nodeName: ${node.name}, styleId: ${node.fillStyleId}`,
+      });
+    }
+
     if (color.type === "PAINT") {
       const paint = color as PaintStyle;
       const paints = paint.paints;
       if (paints.length === 1) {
         const paint = paints[0];
         if (paint.type === "GRADIENT_LINEAR") {
-          // throw new Error(`unsupported GRADIENT_LINEAR`);
-          props.backgroundColor =
-            "linear-gradient(to right bottom, #000000, #ffffff)";
+          throw new UnsupportedError({
+            name: "GRADIENT_LINEAR is not supported",
+            context: "convertToCssProperties",
+            where: node.name,
+          });
+          // props.backgroundColor = "linear-gradient(to right bottom, #000000, #ffffff)";
         } else if (paint.type === "SOLID") {
           if (node.type === "TEXT") {
             props.color = name;
@@ -317,7 +388,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
     }
   } else {
     if (isMixed(node.fills)) {
-      // throw new Error("isMixed fills");
+      if (node.type !== "VECTOR") {
+        throw new UnsupportedError({
+          name: "fills is figma.mixed",
+          context: "convertToCssProperties",
+          where: node.name,
+        });
+      }
     }
     if (!isMixed(node.fills) && node.fills.length === 1) {
       const fill = node.fills[0];
@@ -325,8 +402,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
         if (fill.boundVariables?.color) {
           const id = fill.boundVariables.color.id;
           const color = figma.variables.getVariableById(id);
-          if (!id) throw new Error("id is null");
-          if (!color) throw new Error("color is null");
+          if (!color) {
+            throw new UnexpectedError({
+              name: "figma.variables.getVariableById(id) is null",
+              context: "convertToCssProperties, fills",
+              where: `nodeName: ${node.name}, variableId: ${id}`,
+            });
+          }
           const name = convertToCssAvairableName(color.id);
 
           if (node.type === "TEXT" || node.type === "VECTOR") {

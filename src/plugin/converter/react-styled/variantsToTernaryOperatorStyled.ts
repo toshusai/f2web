@@ -32,14 +32,14 @@ export function variantsToTernaryOperatorStyled(
   }`;
   }
 
-  return `\${({$${convertToVariantAvairableName(
+  `\${({$${convertToVariantAvairableName(
     key
   )}}) => $${convertToVariantAvairableName(key)} === "${value}" ? \`${
     cssObj.css + cssObj.before
-  }\` : ${variantsToTernaryOperatorStyled(
+  }\` : \`${variantsToTernaryOperatorStyled(
     Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
     defaultValue
-  )}}`;
+  )}\`}`;
 }
 
 function indent(str: string, depth: number) {

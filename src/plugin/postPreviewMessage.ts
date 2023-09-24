@@ -6,8 +6,8 @@ import { stylesToClassAttrsRecursive } from "./converter/react/stylesToClassAttr
 import { DomNode } from "./types/DomNode";
 import { parseDomName } from "./converter/parseDomName";
 import { createCssVars } from "./createCssVars";
-import { domNodeToHtmlCssAll } from "./converter/html-css/domNodeToHtmlCssAll";
 import { compareTreeNode } from "./converter/compareTreeNode";
+import { colorToHex } from "./utils/colorToHex";
 
 export function postSelectMessage() {
   const node = figma.currentPage.selection[0];
@@ -26,6 +26,14 @@ export function postSelectMessage() {
       },
     });
   }
+}
+
+function getFigmaPageBackgroundColor() {
+  const page = figma.currentPage;
+  if (page.backgrounds.length === 0) return "#fff";
+  const bg = page.backgrounds[0];
+  if (bg.type === "SOLID") return colorToHex(bg.color, bg.opacity ?? 1);
+  return "#fff";
 }
 
 export async function postPreviewMessage() {
@@ -54,7 +62,6 @@ export async function postPreviewMessage() {
     if (isTextDomNode(domNode)) return;
     compareTreeNode(domNodes[0], domNode, domNode.name ?? "");
   });
-  const html = domNodeToHtmlCssAll(domNodes[0], ctx);
 
   ctx.ignoreInstance = false;
   const rawDomNodes = (
@@ -68,9 +75,9 @@ export async function postPreviewMessage() {
     type: "generate",
     message: {
       domNodes: rawDomNodes,
-      html: html,
+      ignoreInstancedDomNodes: domNodes,
       ctx: ctx,
-      // cssVars,
+      bg: getFigmaPageBackgroundColor(),
     },
   });
 }

@@ -11,6 +11,7 @@ export type Properties = {
   borderTopRightRadius: number;
   borderTopWidth: number;
   bottom: number;
+  boxSizing: "border-box" | "content-box";
   boxShadow: string;
   color: string;
   display: "flex" | "hidden";

@@ -6,10 +6,8 @@ import typescript from "highlight.js/lib/languages/typescript";
 import { addMessageEventListener } from "../addMessageEventListener";
 import { Preview } from "./Preview";
 import { Button } from "./Button";
-import { update } from "./update";
 
-export declare const prettierPlugins: any;
-export declare const prettier: any;
+import "../index.css";
 
 export async function post(path: string, body: any) {
   const res = await fetch("http://localhost:3000" + path, {
@@ -36,15 +34,21 @@ export function App() {
       });
     });
     const gen = addMessageEventListener("generate", (message) => {
-      update(message);
       setMessage({
         type: "generate",
+        message,
+      });
+    });
+    const error = addMessageEventListener("error", (message) => {
+      setMessage({
+        type: "error",
         message,
       });
     });
     return () => {
       selection();
       gen();
+      error();
     };
   }, []);
 
@@ -57,16 +61,44 @@ export function App() {
     (message.type === "selection" && message.message.type !== "COMPONENT_SET")
   ) {
     return (
-      <div className="py-[8px] flex justify-center w-full flex-col gap-[8px] items-center h-[100vh]">
+      <div className="box">
         <Button disabled>Generate</Button>
-        <div className="h-[24px]">Select Component Set</div>
+        <div
+          style={{
+            height: "24px",
+          }}
+        >
+          Select Component Set
+        </div>
       </div>
     );
   } else if (message.type === "selection") {
     return (
-      <div className="py-[8px] flex justify-center w-full flex-col gap-[8px] items-center h-[100vh]">
+      <div className="box">
         <Button onClick={handleClickGenerate}>Generate</Button>
-        <div className="h-[24px]"></div>
+        <div
+          style={{
+            height: "24px",
+          }}
+        ></div>
+      </div>
+    );
+  } else if (message.type === "error") {
+    return (
+      <div className="box">
+        <Button disabled>Generate</Button>
+        <div
+          className="mono"
+          style={{
+            height: "24px",
+            padding: "0 32px",
+            color: "#ff0000",
+            width: "-webkit-fill-available",
+            overflowWrap: "anywhere",
+          }}
+        >
+          {message.message}
+        </div>
       </div>
     );
   }

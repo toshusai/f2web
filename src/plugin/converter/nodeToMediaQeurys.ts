@@ -1,6 +1,6 @@
 import { AttrValue } from "../types/AttrValue";
 
-function nodeToMediaQeurys(
+export function nodeToMediaQeurys(
   variants: Record<string, AttrValue>,
   defaultValue: string,
   ignoreInstance
@@ -16,7 +16,6 @@ function nodeToMediaQeurys(
   if (key.startsWith("@")) {
     const variantClasses = variantValue.value.split(" ");
 
-    const plusDiff = variantClasses.filter((x) => !final.includes(x));
     const minusDiff = final.filter((x) => !variantClasses.includes(x));
     minusDiff.forEach((x) => {
       if (x === "hidden") {

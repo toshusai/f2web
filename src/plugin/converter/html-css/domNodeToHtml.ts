@@ -82,7 +82,11 @@ export function domNodeToHtmlCss(
     if (ctx.isPreview) {
       attrs = attrs.map((x) => {
         if (x.startsWith("src=")) {
-          return `src="https://via.placeholder.com/150"`;
+          const w =
+            typeof node.styles?.width === "number" ? node.styles?.width : 150;
+          const h =
+            typeof node.styles?.height === "number" ? node.styles?.height : 150;
+          return `src="https://via.placeholder.com/${w}x${h}"`;
         }
         return x;
       });

@@ -1,19 +1,67 @@
 import React, { useEffect } from "react";
-import hljs from "highlight.js";
 import { getReactSrc } from "../../plugin/converter/react/getReactSrc";
 import { compareTreeNode } from "../../plugin/converter/compareTreeNode";
 import { toCssStyleText } from "../../plugin/converter/html-css/toCssStyleText";
 import { stylesToClassAttrsRecursive } from "../../plugin/converter/react/stylesToClassAttrsRecursive";
 import { getReactStyledSrc } from "../../plugin/converter/react-styled/getReactStyledSrc";
-import { prettier, prettierPlugins } from "./App";
 import { Tabs } from "./Tabs";
+import { FormatedCode } from "./FormatedCode";
+import { domNodeToHtmlCssAll } from "../../plugin/converter/html-css/domNodeToHtmlCssAll";
+import { Radios } from "./Radios";
+
+export enum CodeType {
+  Styled = "styled",
+  Tailwind = "tailwind",
+  Html = "html",
+  Preview = "preview",
+}
+
+type Variants = {
+  [key: string]: string[];
+};
 
 export function Preview(props: { message: any }) {
-  const [option, setOption] = React.useState<"tailwind" | "styled">("tailwind");
+  const [option, setOption] = React.useState<CodeType>(CodeType.Preview);
   const { message } = props;
   // some methods will mutate the message so we need to clone it
-  const { html, ctx, domNodes } = JSON.parse(JSON.stringify(message));
-  const [error, setError] = React.useState<string>("");
+  const { ctx, domNodes, ignoreInstancedDomNodes, bg } = JSON.parse(
+    JSON.stringify(message)
+  );
+
+  const [currentVariant, setCurrentVariant] = React.useState<string>(
+    ignoreInstancedDomNodes[0].name
+  );
+
+  const ignoreInstancedDomNode =
+    ignoreInstancedDomNodes.find((x) => x.name === currentVariant) ||
+    ignoreInstancedDomNodes[0];
+
+  const domNode = domNodes[0];
+
+  const variants: Variants = {};
+
+  ignoreInstancedDomNodes.map((x) => {
+    const [key, value] = x.name.split("=");
+
+    if (!variants[key]) {
+      variants[key] = [];
+    }
+    variants[key].push(value);
+  });
+
+  const styleInnerHtml = toCssStyleText(ctx.colors);
+
+  if (option === CodeType.Tailwind) {
+    domNodes.forEach((x) => {
+      stylesToClassAttrsRecursive(x);
+    });
+  }
+  domNodes.forEach((variantNode, i) => {
+    if (i === 0) return;
+    compareTreeNode(domNode, variantNode, variantNode.name);
+  });
+
+  const html = domNodeToHtmlCssAll(ignoreInstancedDomNode, ctx);
 
   let html2 = html;
   if (ctx.images) {
@@ -23,80 +71,38 @@ export function Preview(props: { message: any }) {
       html2 = html2.replace(new RegExp(key, "g"), url);
     });
   }
-  const styleInnerHtml = toCssStyleText(ctx.colors);
-
-  const domNode = domNodes[0];
-  if (option === "tailwind") {
-    domNodes.forEach((x) => {
-      stylesToClassAttrsRecursive(x);
-    });
-  }
-  domNodes.forEach((domNode, i) => {
-    if (i === 0) return;
-    compareTreeNode(domNodes[0], domNode, domNode.name);
-  });
-
-  const src =
-    option === "tailwind"
-      ? getReactSrc(domNode, ctx)
-      : getReactStyledSrc(domNode, ctx);
 
   let tailwindConfigColors = {};
   Object.keys(ctx.colors).forEach((key) => {
     tailwindConfigColors[ctx.colors[key].id] = `var(--${ctx.colors[key].id})`;
   });
 
-  let formatted = src;
-  try {
-    formatted = prettier.format(src, {
-      parser: "typescript",
-      plugins: prettierPlugins,
-    });
-  } catch (e: any) {
-    const internalError = `Internal error: code generation failed. Please report this issue on`;
-    if (error != internalError) {
-      setError(internalError);
-    }
-  }
-
-  const codeRef = React.useRef<HTMLPreElement>(null);
+  const [src, setSrc] = React.useState<string>("");
   useEffect(() => {
-    if (!codeRef.current) return;
-    hljs.highlightAll();
-
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: ctx.colors,
-        },
-      },
-    };
-  }, [option]);
+    let src = "";
+    if (option === CodeType.Html) {
+      src = html;
+    } else if (option === CodeType.Tailwind) {
+      src = getReactSrc(domNode, ctx);
+    } else if (option === CodeType.Styled) {
+      src = getReactStyledSrc(domNode, ctx);
+    }
+    setSrc(src);
+  }, [option, domNode, ctx]);
 
   return (
     <>
-      <div className="text-red-500">{error}</div>
       <style
-        id="tailwind"
         dangerouslySetInnerHTML={{
           __html: styleInnerHtml,
         }}
       ></style>
-      <div
-        style={{
-          padding: "16px",
-          display: "flex",
-          justifyContent: "center",
-          background: "linear-gradient(180deg, #FFFFFF 0%, #F2F2F2 100%)",
-          borderTop: "1px solid #E0E0E0",
-          borderBottom: "1px solid #E0E0E0",
-        }}
-        dangerouslySetInnerHTML={{
-          __html: html2,
-        }}
-      ></div>
       <Tabs
         items={[
+          {
+            label: "Preview",
+            value: "preview",
+          },
           {
             label: "Tailwind",
             value: "tailwind",
@@ -105,22 +111,55 @@ export function Preview(props: { message: any }) {
             label: "Styled",
             value: "styled",
           },
+          {
+            label: "HTML",
+            value: "html",
+          },
         ]}
         active={option}
         onClick={(value) => {
-          setOption(value as "tailwind" | "styled");
+          setOption(value as CodeType);
         }}
       />
-      <pre
-        style={{
-          fontSize: "10px",
-          lineHeight: "10px",
-        }}
-      >
-        <code className="language-typescript" ref={codeRef}>
-          {formatted}
-        </code>
-      </pre>
+
+      {option === CodeType.Preview ? (
+        <div>
+          <div
+            style={{
+              padding: "16px",
+              height: "256px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              background: bg,
+              borderTop: "1px solid #E0E0E0",
+              borderBottom: "1px solid #E0E0E0",
+            }}
+            dangerouslySetInnerHTML={{
+              __html: html2,
+            }}
+          ></div>
+          {Object.keys(variants).map((key) => {
+            if (variants[key].length === 1) return null;
+            return (
+              <Radios
+                key={key}
+                name={key}
+                items={variants[key].map((x) => ({
+                  label: x,
+                  value: x,
+                }))}
+                active={currentVariant}
+                onClick={(value) => {
+                  setCurrentVariant(`${key}=${value}`);
+                }}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <FormatedCode src={src} type={option} />
+      )}
     </>
   );
 }

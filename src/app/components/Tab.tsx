@@ -1,4 +1,5 @@
 import React from "react";
+import { classes } from "./Button";
 
 export function Tab(props: {
   children: React.ReactNode;
@@ -8,9 +9,7 @@ export function Tab(props: {
   return (
     <div
       onClick={props.onClick}
-      className={`py-[8px] px-[16px] ${
-        props.active ? "bg-[#b93535]" : ""
-      } cursor-pointer`}
+      className={classes("tab", props.active && "tab-active")}
     >
       {props.children}
     </div>

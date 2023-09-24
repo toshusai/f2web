@@ -8,10 +8,23 @@ export function stylesToStyledCss(
   domName = "div"
 ) {
   let { css, before } = stylesToCssString(props);
+
+  before =
+    before != ""
+      ? `  &:before {\n${before
+          .trimEnd()
+          .split(`\n`)
+          .map((x) => `    ${x}`)
+          .join("\n")}
+  }`
+      : "";
   css = `const ${name} = styled${
     isFistLetterUpperCase(domName) ? `(${domName})` : `.${domName}`
   }\`
-${css.split("\n").map(x=>`  ${x}`).join("\n")}${before}
+${css
+  .split("\n")
+  .map((x) => `  ${x}`)
+  .join("\n")}${before}
 \`
 `;
 

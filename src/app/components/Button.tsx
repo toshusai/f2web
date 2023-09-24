@@ -9,11 +9,13 @@ export function Button(props: {
     <button
       onClick={props.onClick}
       disabled={props.disabled}
-      className={`py-[4px] px-[12px] bg-blue-500 rounded-full text-white text-[16px]${
-        props.disabled ? " opacity-50 cursor-not-allowed" : ""
-      }`}
+      className={classes("btn", props.disabled && "btn-disabled")}
     >
       {props.children}
     </button>
   );
+}
+
+export function classes(...args: any[]) {
+  return args.filter(Boolean).join(" ");
 }

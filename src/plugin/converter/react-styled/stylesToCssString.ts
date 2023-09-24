@@ -1,10 +1,12 @@
 import { Properties } from "../../types/Properties";
 
-
 export function stylesToCssString(props: Partial<Properties>) {
   let css = ``;
   let before = ``;
 
+  if (props.boxSizing) {
+    css += `box-sizing: ${props.boxSizing};\n`;
+  }
   if (props.alignItems) {
     css += `align-items: ${props.alignItems};\n`;
   }
@@ -68,8 +70,9 @@ export function stylesToCssString(props: Partial<Properties>) {
   if (props.display) {
     if (props.display === "hidden") {
       css += `display: none;\n`;
+    } else {
+      css += `display: ${props.display};\n`;
     }
-    css += `display: ${props.display};\n`;
   }
   if (props.flexDirection) {
     css += `flex-direction: ${props.flexDirection};\n`;
@@ -150,10 +153,12 @@ export function stylesToCssString(props: Partial<Properties>) {
       css += `width: ${props.width}px;\n`;
     }
   }
-  if (props.borderBottomWidth ||
+  if (
+    props.borderBottomWidth ||
     props.borderLeftWidth ||
     props.borderRightWidth ||
-    props.borderTopWidth) {
+    props.borderTopWidth
+  ) {
     before += `content: "";\n`;
     before += `position: absolute;\n`;
     before += `width: 100%;\n`;
