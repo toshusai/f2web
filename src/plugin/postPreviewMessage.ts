@@ -46,12 +46,11 @@ export async function postPreviewMessage() {
     colors: [],
     ...parseDomName(node.name),
   };
-  const domNodes = (
-    await Promise.all(
-      node.children.map((child) => figmaNodeToDomNode(child, ctx))
-    )
-  ).filter((x) => x !== null) as DomNode[];
-  if (!domNodes) return;
+  const domNodes: DomNode[] = [];
+  for (const child of node.children) {
+    const domNode = await figmaNodeToDomNode(child, ctx);
+    if (domNode) domNodes.push(domNode);
+  }
   domNodes.forEach((x) => {
     stylesToClassAttrsRecursive(x);
   });
@@ -64,13 +63,11 @@ export async function postPreviewMessage() {
   });
 
   ctx.ignoreInstance = false;
-  const rawDomNodes = (
-    await Promise.all(
-      node.children.map((child) => figmaNodeToDomNode(child, ctx))
-    )
-  ).filter((x) => x !== null) as DomNode[];
-  if (!rawDomNodes) return;
-
+  const rawDomNodes: DomNode[] = [];
+  for (const child of node.children) {
+    const domNode = await figmaNodeToDomNode(child, ctx);
+    if (domNode) rawDomNodes.push(domNode);
+  }
   figma.ui.postMessage({
     type: "generate",
     message: {

@@ -5,11 +5,13 @@ export type Properties = {
   borderBottomRightRadius: number;
   borderBottomWidth: number;
   borderColor: string;
+  borderRadius: number;
   borderLeftWidth: number;
   borderRightWidth: number;
   borderTopLeftRadius: number;
   borderTopRightRadius: number;
   borderTopWidth: number;
+  borderWidth: number;
   bottom: number;
   boxSizing: "border-box" | "content-box";
   boxShadow: string;
@@ -31,6 +33,7 @@ export type Properties = {
   paddingLeft: number;
   paddingRight: number;
   paddingTop: number;
+  padding: number | number[];
   position: "absolute" | "relative";
   right: number;
   textAlign: "left" | "center" | "right";

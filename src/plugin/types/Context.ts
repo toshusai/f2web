@@ -17,4 +17,6 @@ export type Context = {
   };
   depth?: number;
   meta?: DomMeta;
+
+  svgCache: Record<string, string>;
 };

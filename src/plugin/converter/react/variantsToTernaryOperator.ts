@@ -29,13 +29,13 @@ export function variantsToTernaryOperator(
       }
     });
 
-    const split = value.split(": ")
+    const split = value.split(": ");
     const minMax = split[0].split("-")[0];
     const px = split[1].split("px")[0];
 
     final = [
       ...final,
-      variantClasses.map((x) => `${minMax}-[${px}px]:${x}`),
+      variantClasses.map((x) => `${minMax}-[${px}px]:${x}`).join(" "),
       ...variantsToTernaryOperator(
         Object.fromEntries(keys.slice(1).map((key) => [key, variants[key]])),
         defaultValue.replace(/"/g, ""),
@@ -45,7 +45,7 @@ export function variantsToTernaryOperator(
 
     return `"${final.join(" ")}"`;
   }
-  
+
   return `props.${convertToVariantAvairableName(
     key
   )} === "${value}" ? "${variantValue}" : ${variantsToTernaryOperator(

@@ -8,6 +8,7 @@ import { Tabs } from "./Tabs";
 import { FormatedCode } from "./FormatedCode";
 import { domNodeToHtmlCssAll } from "../../plugin/converter/html-css/domNodeToHtmlCssAll";
 import { Radios } from "./Radios";
+import { update } from "./update";
 
 export enum CodeType {
   Styled = "styled",
@@ -79,15 +80,20 @@ export function Preview(props: { message: any }) {
 
   const [src, setSrc] = React.useState<string>("");
   useEffect(() => {
-    let src = "";
+    let _src = "";
     if (option === CodeType.Html) {
-      src = html;
+      _src = html;
     } else if (option === CodeType.Tailwind) {
-      src = getReactSrc(domNode, ctx);
+      _src = getReactSrc(domNode, ctx);
     } else if (option === CodeType.Styled) {
-      src = getReactStyledSrc(domNode, ctx);
+      _src = getReactStyledSrc(domNode, ctx);
     }
-    setSrc(src);
+    if (src != _src) {
+      setSrc(_src);
+      if (!option) {
+        update(message, option);
+      }
+    }
   }, [option, domNode, ctx]);
 
   return (
@@ -134,6 +140,7 @@ export function Preview(props: { message: any }) {
               background: bg,
               borderTop: "1px solid #E0E0E0",
               borderBottom: "1px solid #E0E0E0",
+              overflow: "auto",
             }}
             dangerouslySetInnerHTML={{
               __html: html2,

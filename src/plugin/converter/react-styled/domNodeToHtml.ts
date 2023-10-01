@@ -86,7 +86,7 @@ export function domNodeToReactStyledString(
           attrs += ` $${keyName}={props.${keyName}}`;
         });
       }
-    }else{
+    } else {
     }
 
     ctx.cssClasses.push(css);
@@ -116,6 +116,8 @@ export function domNodeToReactStyledString(
       .join("");
     if (node.type === "img") {
       tagJsx = `${indent}<${tag} ${attrs} />\n`;
+    } else if (node.type === "svg") {
+      return `${indent}<${tag} ${attrs}></${tag}>\n`;
     } else {
       tagJsx = `${indent}<${tag} ${attrs}>\n${children}${indent}</${tag}>\n`;
     }
@@ -128,7 +130,7 @@ export function domNodeToReactStyledString(
       ignoreInstance,
       node,
       ctx
-    )
+    );
     if (inner !== false && inner !== tagJsx) {
       tagJsx = `${indent}{${inner.replace(/\n/g, "")}}\n`;
     }

@@ -6,7 +6,7 @@ import { supportedNodes } from "./supportedNodes";
 import { variantToProps } from "./variantToProps";
 import { parseDomName } from "./parseDomName";
 import { toCamelCase } from "js-convert-case";
-import { convertToCssProperties } from "./convertToCssProperties";
+import { FigmaClient, convertToCssProperties } from "./convertToCssProperties";
 import { AttrType, AttrValue } from "../types/AttrValue";
 import { domToDomNode } from "./domToDomNode";
 import { Context } from "../types/Context";
@@ -15,13 +15,17 @@ var DomParser = require("dom-parser");
 
 export async function figmaNodeToDomNode(
   node: SceneNode,
-  ctx: Context
+  ctx: Context,
+  client: FigmaClient = {
+    getVariableById: figma.variables.getVariableById,
+    getStyleById: figma.getStyleById,
+  }
 ): Promise<DomNode | null> {
   if (!ctx.depth) ctx.depth = 0;
 
   let attrs: Record<string, AttrValue> = {};
   let variants: Record<string, DomNode> | undefined = undefined;
-  const styles = await convertToCssProperties(node, ctx);
+  const styles = await convertToCssProperties(node, ctx, client);
   if (!styles) return null;
   if (node.parent?.type === "COMPONENT_SET") {
     ctx.props = {
@@ -103,8 +107,15 @@ export async function figmaNodeToDomNode(
   const ignoreInstance =
     node.type === "INSTANCE" && ctx.ignoreInstance === true;
   if (node.type === "VECTOR") {
-    const res = await node.exportAsync({ format: "SVG" });
-    const svg = new TextDecoder("utf-8").decode(res);
+    let svg = "";
+    if (!ctx.svgCache) ctx.svgCache = {};
+    if (ctx.svgCache[node.name]) {
+      svg = ctx.svgCache[node.name];
+    } else {
+      const res = await node.exportAsync({ format: "SVG" });
+      svg = new TextDecoder("utf-8").decode(res);
+      ctx.svgCache[node.name] = svg;
+    }
     const parser = new DomParser();
     const svgDom = parser.parseFromString(svg);
 
@@ -116,7 +127,7 @@ export async function figmaNodeToDomNode(
   }
   if (node.type === "FRAME" || node.type === "COMPONENT" || ignoreInstance) {
     const childrenPromises = node.children.map(
-      async (child) => await figmaNodeToDomNode(child, ctx)
+      async (child) => await figmaNodeToDomNode(child, ctx, client)
     );
     const children = (await Promise.all(childrenPromises)).filter(
       (x) => x !== null

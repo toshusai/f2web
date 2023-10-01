@@ -24,7 +24,23 @@ class UnexpectedError extends Error {
   }
 }
 
-export async function convertToCssProperties(node: SceneNode, ctx: Context) {
+export type FigmaClient = {
+  getVariableById?: (id: string) => Promise<Variable | null> | Variable | null;
+  getStyleById?: (id: string) => Promise<BaseStyle | null> | BaseStyle | null;
+  getImageByHash?: (hash: string) => Image | null;
+};
+
+export async function convertToCssProperties(
+  node: SceneNode,
+  ctx: Context,
+  {
+    getVariableById = figma.variables.getVariableById,
+    getStyleById = figma.getStyleById,
+  }: FigmaClient | undefined = {
+    getVariableById: figma.variables.getVariableById,
+    getStyleById: figma.getStyleById,
+  }
+) {
   if (!supportedNodes(node)) return null;
   const props: Partial<Properties> = {};
 
@@ -277,7 +293,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       if (stroke.type === "SOLID") {
         if (stroke.boundVariables?.color) {
           const id = stroke.boundVariables.color.id;
-          const color = figma.variables.getVariableById(id);
+          const _color = getVariableById(id);
+          let color: Variable | null = null;
+          if (_color instanceof Promise) {
+            color = await _color;
+          } else {
+            color = _color;
+          }
 
           if (!color) {
             throw new UnexpectedError({
@@ -350,7 +372,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
   if (node.fillStyleId) {
     if (isMixed(node.fillStyleId)) throw new Error("isMixed fillStyleId");
     const name = convertToCssAvairableName(node.fillStyleId);
-    const color = figma.getStyleById(node.fillStyleId);
+    const _color = getStyleById(node.fillStyleId);
+    let color: BaseStyle | null = null;
+    if (_color instanceof Promise) {
+      color = await _color;
+    } else {
+      color = _color;
+    }
     if (!color) {
       throw new UnexpectedError({
         name: "figma.getStyleById(node.fillStyleId) is null",
@@ -401,7 +429,13 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
       if (fill.type === "SOLID") {
         if (fill.boundVariables?.color) {
           const id = fill.boundVariables.color.id;
-          const color = figma.variables.getVariableById(id);
+          const _color = getVariableById(id);
+          let color: Variable | null = null;
+          if (_color instanceof Promise) {
+            color = await _color;
+          } else {
+            color = _color;
+          }
           if (!color) {
             throw new UnexpectedError({
               name: "figma.variables.getVariableById(id) is null",
@@ -425,17 +459,6 @@ export async function convertToCssProperties(node: SceneNode, ctx: Context) {
           }
         }
       } else if (fill.type === "IMAGE") {
-        if (fill.imageHash) {
-          const res = await figma
-            .getImageByHash(fill.imageHash)
-            ?.getBytesAsync();
-          ctx.images = ctx.images ?? {};
-          if (res) {
-            ctx.images[fill.imageHash] = res;
-          }
-          ctx.props = ctx.props ?? {};
-          //`https://picsum.photos/seed/${fill.imageHash}/200/300`,
-        }
       }
     }
   }

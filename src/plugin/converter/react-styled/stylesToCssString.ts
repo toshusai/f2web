@@ -1,10 +1,89 @@
 import { Properties } from "../../types/Properties";
 
-export function stylesToCssString(props: Partial<Properties>) {
+function optimizeCss(props: Partial<Properties>) {
+  const newProps: Partial<Properties> = {
+    ...props,
+  };
+
+  if (
+    newProps.borderBottomLeftRadius === newProps.borderBottomRightRadius &&
+    newProps.borderBottomLeftRadius === newProps.borderTopLeftRadius &&
+    newProps.borderBottomLeftRadius === newProps.borderTopRightRadius
+  ) {
+    newProps.borderRadius = newProps.borderBottomLeftRadius;
+    delete newProps.borderBottomLeftRadius;
+    delete newProps.borderBottomRightRadius;
+    delete newProps.borderTopLeftRadius;
+    delete newProps.borderTopRightRadius;
+  }
+
+  if (
+    newProps.borderBottomWidth === newProps.borderTopWidth &&
+    newProps.borderBottomWidth === newProps.borderLeftWidth &&
+    newProps.borderBottomWidth === newProps.borderRightWidth
+  ) {
+    newProps.borderWidth = newProps.borderBottomWidth;
+    delete newProps.borderBottomWidth;
+    delete newProps.borderTopWidth;
+    delete newProps.borderLeftWidth;
+    delete newProps.borderRightWidth;
+  }
+
+  if (
+    newProps.paddingBottom === newProps.paddingTop &&
+    newProps.paddingBottom === newProps.paddingLeft &&
+    newProps.paddingBottom === newProps.paddingRight
+  ) {
+    newProps.padding = newProps.paddingBottom;
+    delete newProps.paddingBottom;
+    delete newProps.paddingTop;
+    delete newProps.paddingLeft;
+    delete newProps.paddingRight;
+  }
+
+  if (
+    newProps.paddingLeft !== undefined &&
+    newProps.paddingTop !== undefined &&
+    newProps.paddingLeft === newProps.paddingRight &&
+    newProps.paddingTop === newProps.paddingBottom &&
+    newProps.paddingLeft !== newProps.paddingTop
+  ) {
+    newProps.padding = [newProps.paddingTop, newProps.paddingLeft];
+    delete newProps.paddingLeft;
+    delete newProps.paddingTop;
+    delete newProps.paddingRight;
+    delete newProps.paddingBottom;
+  }
+
+  if (newProps.justifyContent === "start") {
+    delete newProps.justifyContent;
+  }
+  if (newProps.alignItems === "start") {
+    delete newProps.alignItems;
+  }
+
+  if (newProps.textAlign === "left") {
+    delete newProps.textAlign;
+  }
+  if (newProps.fontWeight === 400) {
+    delete newProps.fontWeight;
+  }
+  return newProps;
+}
+
+export function stylesToCssString(_props: Partial<Properties>) {
+  const props = optimizeCss(_props);
   let css = ``;
   let before = ``;
 
-  if (props.boxSizing) {
+  if (
+    props.boxSizing &&
+    (props.padding !== undefined ||
+      props.paddingTop !== undefined ||
+      props.paddingBottom !== undefined ||
+      props.paddingLeft !== undefined ||
+      props.paddingRight !== undefined)
+  ) {
     css += `box-sizing: ${props.boxSizing};\n`;
   }
   if (props.alignItems) {
@@ -29,6 +108,7 @@ export function stylesToCssString(props: Partial<Properties>) {
   }
   if (props.borderBottomWidth) {
     before += `border-bottom-width: ${props.borderBottomWidth}px;\n`;
+    before += `border-bottom-style: solid;\n`;
   }
   if (props.borderColor) {
     if (props.borderColor.startsWith("#")) {
@@ -39,9 +119,11 @@ export function stylesToCssString(props: Partial<Properties>) {
   }
   if (props.borderLeftWidth) {
     before += `border-left-width: ${props.borderLeftWidth}px;\n`;
+    before += `border-left-style: solid;\n`;
   }
   if (props.borderRightWidth) {
     before += `border-right-width: ${props.borderRightWidth}px;\n`;
+    before += `border-right-style: solid;\n`;
   }
   if (props.borderTopLeftRadius) {
     before += `border-top-left-radius: ${props.borderTopLeftRadius}px;\n`;
@@ -53,6 +135,20 @@ export function stylesToCssString(props: Partial<Properties>) {
   }
   if (props.borderTopWidth) {
     before += `border-top-width: ${props.borderTopWidth}px;\n`;
+    before += `border-top-style: solid;\n`;
+  }
+  if (props.borderRadius) {
+    css += `border-radius: ${props.borderRadius}px;\n`;
+  }
+  if (props.borderWidth) {
+    css += `border-width: ${props.borderWidth}px;\n`;
+  }
+  if (props.padding) {
+    if (typeof props.padding === "number") {
+      css += `padding: ${props.padding}px;\n`;
+    } else {
+      css += `padding: ${props.padding[0]}px ${props.padding[1]}px;\n`;
+    }
   }
   if (props.bottom) {
     css += `bottom: ${props.bottom}px;\n`;
